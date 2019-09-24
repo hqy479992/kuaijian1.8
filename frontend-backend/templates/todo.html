@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <title>快剪</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--bootstrap-->
+  <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="static/css/bootstrap-grid.min.css">
+  <link rel="stylesheet" type="text/css" href="static/css/bootstrap-reboot.min.css">
+  <!--font awesome图标-->
+  <link rel="stylesheet" type="text/css" href="static/css/font-awesome.min.css">
+  <!--自定义css-->
+  <link rel="stylesheet" type="text/css" href="static/css/style.css">
+</head>
+<body>
+  <div id="header"></div>
+  <div class="container-fluid mainboard">
+    <div class="row maincontent">
+      <nav class="col-2 bg-dark sidebar pt-2 text-center">
+      </nav>
+      <div class="col-10">
+        <div class="row mt-4 bg-light" id="function_area">
+          <button type="button" class="btn btn-secondary my-3 ml-5" data-toggle="collapse" data-target="#collapsechanelchoose" aria-expanded="false" aria-controls="collapseExample"><span class="fa fa-scissors mr-1"></span>合成</button>
+          <button type="button" class="btn btn-secondary my-3 ml-3" data-toggle="modal" data-target="#deletefilemodal"><span class="fa fa-trash-o mr-1"></span>删除</button>
+          <button type="button" class="btn btn-secondary my-3 ml-3"><span class="fa fa-pencil mr-1"></span>重命名</button>
+          <button type="button" class="btn btn-secondary ml-3 my-3" id="openfolder"><span class="fa fa-folder-open mr-1"></span>打开文件夹</button>
+          <button type="button" class="btn btn-secondary my-3 ml-3" id="backtoprevious"><span class="fa fa-chevron-left mr-1"></span>返回上一级</button>
+        </div>
+        <div class="collapse mt-3" id="collapsechanelchoose">
+          <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group ml-3 btn-group-sm mb-1 pb-1" role="group" aria-label="First group" id="chanel0">
+              <button type="button" class="btn btn-secondary" disabled="true">通道1</button>
+            </div>
+            <div class="btn-group ml-3 btn-group-sm mb-1 pb-1" role="group" aria-label="Last group" id="chanelchooseend">
+              <button type="button" class="btn btn-info" id="startsettings"><span class="fa fa-scissors mr-1"></span>开始合成</button>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-2" id="showboard">
+        </div>
+        <div class="modal fade" id="deletefilemodal" tabindex="-1" role="dialog" aria-labelledby="deletefilemodaltitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deletefilemodaltitle">删除文件！</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body"><p id="deletefilename"></p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">放弃</button>
+                <button type="button" class="btn btn-primary" id="suredelete">确定删除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script type="text/javascript" src="static/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript" src="static/js/js.cookie.js"></script>
+<script type="text/javascript">
+  var csrftoken=Cookies.get('csrftoken')
+  function csrfSafeMethod(method){
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method))
+  }
+  $.ajaxSetup({
+    beforeSend:function(xhr,settings){
+      if (!csrfSafeMethod(settings.type)&&!this.crossDomain) {
+        xhr.setRequestHeader('X-CSRFToken',csrftoken)
+      }
+    }
+  })
+</script>
+<!--自定义js-->
+<script type="text/javascript" src="static/js/todo.js"></script>
+</body>
+</html>

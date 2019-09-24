@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <title>快剪</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--bootstrap-->
+  <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" media="screen">
+  <link rel="stylesheet" type="text/css" href="static/css/bootstrap-grid.min.css">
+  <link rel="stylesheet" type="text/css" href="static/css/bootstrap-reboot.min.css">
+  <!--font awesome图标-->
+  <link rel="stylesheet" type="text/css" href="static/css/font-awesome.min.css">
+  <!--自定义css-->
+  <link rel="stylesheet" type="text/css" href="static/css/style.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary headbar">
+    <a class="navbar-brand" href=""><span class="fa fa-scissors mr-1"></span>FastCilp</a>
+    <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarid" aria-controls="navbarid" aria-expanded="false" aria-label="Toggle-navogation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarid">
+      <form class="form-inline mr-2 ml-auto">
+        <input type="search" class="form-control mr-sm-2" placeholder="Search..." aria-label="Search">
+        <button class="btn btn-outline-info my-2 my-sm-0" type="submit">Search</button>
+      </form>
+      <ul class="navbar-nav ml-2 mr-0">
+        <li class="nav-item active">
+          <a class="nav-link" href="">退出</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="container-fluid text-center mainboard">
+    <div class="row maincontent">
+      <nav class="col-2 bg-dark sidebar pt-2">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column pb-5 mb-5">
+            <li class="nav-item my-2"></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link active text-light" href="index.html"><span class="fa fa-home mr-1" aria-hidden="false"></span>首页</a>
+            </li>
+            <li class="nav-item">
+              <a href="" class="nav-link text-light"><span class="fa fa-flag mr-1"></span>使用指南</a>
+            </li>
+            <li class="nav-item">
+              <a href="" class="nav-link text-light"><span class="fa fa-question-circle mr-1"></span>常见问题</a>
+            </li>
+            <li class="nav-item"><hr></li>
+            <li class="nav-item">
+              <a href="" class="nav-link text-light"><span class="fa fa-folder mr-1"></span>未合成</a>
+            </li>
+            <li class="nav-item">
+              <a href="" class="nav-link text-light"><span class="fa fa-list-alt mr-1"></span>合成中</a>
+            </li>
+            <li class="nav-item">
+              <a href="" class="nav-link text-light"><span class="fa fa-hourglass-end mr-1"></span>已合成</a>
+            </li>
+            <li class="nav-item"><hr></li>
+            <li class="nav-item">
+              <a href="" class="nav-link text-light"><span class="fa fa-info-circle mr-1"></span>关于快剪</a>
+            </li>
+            <li class="nav-item">
+              <a href="" class="nav-link text-light"><span class="fa fa-phone mr-1"></span> 联系我们</a>
+            </li>
+          </ul>
+          <div class="copyright pl-4">
+            <p class="text-light">Copyright&copy;2019快剪<br>All rights reserved.</p>
+          </div>
+        </div>
+      </nav>
+      <div class="col-10">
+        <div class="input-group mt-5">
+          <div class="input-group-prepend">
+            <span class="input-group-text" id="useremail">
+              您的邮箱
+            </span>
+          </div>
+          <input type="text" class="form-control" placeholder="您的邮箱..." aria-label="Useremail" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group mt-4">
+          <textarea class="form-control" aria-label="With textarea" placeholder="请简要描述您遇到的问题，我们将尽快给您回信..." rows="20"></textarea>
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script type="text/javascript" src="static/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
