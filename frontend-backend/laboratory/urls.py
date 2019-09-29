@@ -19,13 +19,17 @@ from kuaijian import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     #index
     path(r'index',views.indexhtml),
     path(r'uploadfile',views.uploadfile),
+
     #guide
     path(r'guide',views.guidehtml),
+
     #question
     path(r'question',views.questionhtml),
+
     #todo
     path(r'todo',views.todohtml),
     path(r'getdirsbyupload',views.getdirsbyupload),
@@ -33,21 +37,30 @@ urlpatterns = [
     path(r'backtoprevious',views.backtoprevious),
     path(r'deletefile',views.deletefile),
     path(r'synfolderlist',views.synfolderlist),
+    path(r'renamefile',views.renamefile),
+
     #doing
     path(r'doing',views.doinghtml),
+
     #done
     path(r'done',views.donehtml),
     path(r'resultfiles',views.resultfiles),
     path(r'downloadbigfile',views.downloadbigfile),
+
     #aboutus
     path(r'aboutus',views.aboutushtml),
+
     #contactus
     path(r'contactus',views.contactushtml),
+
     #settings
     path(r'settings',views.settingshtml),
     path(r'settingsvalue',views.settingsvalue),
+    path(r'getDefaultConfig',views.getDefaultConfig),
+
     #navbar
     path(r'navbar',views.navbarhtml),
+
     #header
     path(r'header',views.headerhtml),
 ]

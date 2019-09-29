@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 import simplejson as json
 from django.views.decorators.csrf import csrf_exempt,ensure_csrf_cookie
+from kuaijian.tasks import testCelery
 
 # Create your views here.
 #文件内全局变量
@@ -13,8 +14,11 @@ audio_list=[]
 video_list=[]
 config={
 	'window_size_0':0,
-	'min_out_duration_0':10,
-	'max_out_duration_0':15,
+	'window_size_1':150,       #后面也都默认150
+	'min_output_duration_0':10,
+	'min_output_duration_1':10,
+	'max_output_duration_0':15,
+	'max_output_duration_1':20,#后面都默认20
 	'head_duration':10,
 	'tail_duration':10
 }
@@ -96,15 +100,22 @@ def synfolderlist(request):
 	global audio_list,video_list,audiosuffix,videosuffix
 	try:
 		obj=json.loads(request.body.decode())
-		#音频列表
-		filelistindir(os.path.join('static/uploadfiles',obj[0]),audio_list,audiosuffix)
+		#如果有单独的音频文件夹
+		if obj['audioByVideo']==False:
+			#音频列表
+			filelistindir(os.path.join('static/uploadfiles',obj['audioFolder']),audio_list,audiosuffix)
+			obj['videoAudiolist'].remove(obj['audioFolder'])
+		else:
+			#音频列表
+			filelistindir(os.path.join('static/uploadfiles',obj['audioFolder']),audio_list,videosuffix)
 		#视频列表
-		for i in range(1,len(obj)):
+		for i in range(0,len(obj['videoAudiolist'])):
 			tem_video_list=[]
-			filelistindir(os.path.join('static/uploadfiles',obj[i]),tem_video_list,videosuffix)
+			filelistindir(os.path.join('static/uploadfiles',obj['videoAudiolist'][i]),tem_video_list,videosuffix)
 			video_list.append(tem_video_list)
 		return HttpResponse('success')
-	except:
+	except Exception as e:
+		raise e
 		return HttpResponse('error')
 
 @require_http_methods(['POST'])
@@ -115,7 +126,7 @@ def deletefile(request):
 		obj=json.loads(request.body.decode())
 		deletefilename=obj['deletefilename']
 		nowfolder=obj['nowfolder']
-		path=obj['path']
+		path='static/uploadfiles' #即static
 		if os.path.isdir(os.path.join(path,deletefilename)):
 			shutil.rmtree(os.path.join(os.getcwd(),path,deletefilename))
 		elif os.path.splitext(deletefilename)[1] in videosuffix:
@@ -126,6 +137,27 @@ def deletefile(request):
 		return HttpResponse(get_pathSuffixDict(os.path.join(path,nowfolder)))
 	except:
 		return HttpResponse('error')
+
+@require_http_methods(['POST'])
+@ensure_csrf_cookie
+def renamefile(request):
+	global videosuffix
+	try:
+		obj=json.loads(request.body.decode())
+		originname=obj['originname']
+		nowfolder=obj['nowfolder']
+		newname=obj['newname']
+		path='static/uploadfiles'
+		#如果是视频的话，需要第一帧图片和视频两个都重命名
+		os.rename(os.path.join(path,originname),
+					os.path.join(path,nowfolder,newname+os.path.splitext(originname)[1]))
+		if os.path.splitext(originname)[1] in videosuffix:
+			os.rename(os.path.join(path,os.path.splitext(originname)[0]+'mvtojpg.jpg'),
+						os.path.join(path,nowfolder,newname+'mvtojpg.jpg'))
+		return HttpResponse(get_pathSuffixDict(os.path.join(path,nowfolder)))
+	except:
+		return HttpResponse('error')
+
 
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
@@ -147,13 +179,24 @@ def backtoprevious(request):
 	except Exception as e:
 		raise e
 
-def ExtractAudioTrack(video_list, number):
-# 函数作用：提取指定通道的音轨
-	for i in range(0, len(video_list[number])):
-		video = VideoFileClip(video_list[number][i])  # 打开视频
-		audio = video.audio
-
 #settings界面
+#默认的config只在后端储存，需要时请求，保证前后端的分离
+@require_http_methods(['POST'])
+@ensure_csrf_cookie
+def getDefaultConfig(request):
+	global config
+	try:
+		obj=json.loads(request.body.decode())
+		chanelsum=int(obj['chanelsum']) #仅指视频通道个数,json传过来是字符串，转化为数字
+		for i in range(2,chanelsum):
+			config['window_size_'+str(i)]=config['window_size_1']
+			config['min_output_duration_'+str(i)]=config['min_output_duration_1']
+			config['max_output_duration_'+str(i)]=config['max_output_duration_1']
+		return HttpResponse(json.dumps(config))
+	except Exception as e:
+		return HttpResponse('error')
+		raise e
+
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
 def settingsvalue(request):
@@ -161,21 +204,12 @@ def settingsvalue(request):
 	try:
 		obj=json.loads(request.body.decode())
 		task_name=obj['task_name']
-		del obj['task_name']
-		config=obj
+		config=obj['config']
 		#开始合成
-		config = {
-			"window_size_0" : 0,
-			"window_size_1" : 125,
-			"min_output_duration_0" : 10,
-			"max_output_duration_0" : 15,
-			"min_output_duration_1" : 10,
-			"max_output_duration_1" : 20,
-			"head_duration" : 10,
-			"tail_duration" : 10,
-		}
+		testCelery.delay(task_name,video_list,config,audio_list)
 		return HttpResponse('success')
-	except:
+	except Exception as e:
+		raise e
 		return HttpResponse('error')
 
 #doing界面

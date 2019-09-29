@@ -81,15 +81,6 @@ $('#deletefilemodal').on('show.bs.modal',function(event){
 })
 
 //其他函数
-function getParams(key){
-	var reg=new RegExp('(^|&)'+key+'=([^&]*)(&|$)')
-	var r=window.location.search.substr(1).match(reg)
-	if(r!=null){
-		return decodeURI(r[2])
-	}
-	return null
-}
-
 function showdirs(data){
 	$('#showboard').html('')
 	data=JSON.parse(data)

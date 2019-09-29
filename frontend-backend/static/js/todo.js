@@ -1,10 +1,18 @@
 'use strict'
 //全局变量
+
+//todo界面show函数需要简化！！！！！！！！！bootstrap4风格tooltip需要添加
+
+//是否正在选择通道，默认否，在隐藏面板出现事件触发时变为是，隐藏面板隐藏事件触发变为否
 var chooseingchanel=false
+//所选文件夹中是否含有音频文件夹
+var hasAudio=false
+//音频文件夹名字记录下来
+var audioFolder=''
+//已选中的通道文件夹数组
+var folderlist=new Array()
 
 window.onload=function(){
-	$('#header').load('header')
-	$('nav.col-2').load('navbar')
 	var obj={
 		'type':'upload'
 	}
@@ -24,25 +32,29 @@ window.onload=function(){
 	})
 }
 
-//现在感觉一周前写的代码是坨不可修复的烂泥
 //click事件
+//新增的button以及button组添加一个类newadded，便于合成识别
 var chosed=function(buttonobj){
 	if(buttonobj.innerHTML.lastIndexOf('fa-square-o')!=-1){
 		$(buttonobj).html(buttonobj.innerHTML.replace('fa-square-o','fa-check-square-o'))
 		if(chooseingchanel==true){
 			if ($('#chanelchooseend').prev().attr('id').slice(-1)==0 && $('#chanelchooseend').prev().children('button.btn-outline-secondary').length==0) {
-				$('#chanelchooseend').prev().append($('<button>').attr('type','button').attr('class','btn btn-outline-secondary').attr('disabled','true').append(
-														$(buttonobj).children('p').html()))
+				$('#chanelchooseend').prev().append($('<button>').attr('type','button').attr('class','btn btn-outline-secondary newadded').attr('disabled','true').append(
+														$(buttonobj).attr('data-original-title')))
 			}
 			else{
-				var newchanel='<div class="btn-group ml-3 btn-group-sm pb-1 mb-1" role="group" id="chanel'
+				var newchanel='<div class="btn-group ml-3 btn-group-sm pb-1 mb-1 newadded" role="group" id="chanel'
 							+String(Number($('#chanelchooseend').prev().attr('id').slice(-1))+1)
 							+'"><button type="button" class="btn btn-secondary" disabled="true">'
-							+'通道'+String(Number($('#chanelchooseend').prev().attr('id').slice(-1))+2)
+							+'通道'+$('#collapsechanelchoose').children().children('div').length.toString()
 							+'</button></div>'
 				$('#chanelchooseend').before(newchanel)
 				$('#chanelchooseend').prev().append($('<button>').attr('type','button').attr('class','btn btn-outline-secondary').attr('disabled','true').append(
-														$(buttonobj).children('p').html()))
+														$(buttonobj).attr('data-original-title')))
+			}
+			if ($(buttonobj).html().indexOf('fa-folder-o')!=-1) {
+				hasAudio=true
+				audioFolder=$(buttonobj).attr('data-original-title')
 			}
 		}
 	}
@@ -51,7 +63,7 @@ var chosed=function(buttonobj){
 		if (chooseingchanel==true) {
 			/*<button type="button" class="btn btn-outline-secondary" disabled="disabled">新建文件夹</button>*/
 			$('#collapsechanelchoose').find('button.btn-outline-secondary').each(function(){
-				if($(this).text()==$(buttonobj).children('p').text()){
+				if($(this).text()==$(buttonobj).attr('data-original-title')){
 					$(this).parent().remove()
 					if ($('#collapsechanelchoose').find('button.btn-secondary').length==0) {
 						$('#chanelchooseend').before('<div class="btn-group ml-3 btn-group-sm mb-1 pb-1" role="group" aria-label="First group" id="chanel0">'+
@@ -71,21 +83,20 @@ var chosed=function(buttonobj){
 
 $('#suredelete').click(function(){
 	if(findfirstchosed().text()==''){
-		//do nothing
+		//没有被选择的文件
 	}
 	else{
+		//知道执行该操作时所在的具体文件夹路径是为了及时更新操作后的结果，给用户即时感
 		var folderin=findfirstchosed().text().lastIndexOf('/')
 		var obj
 		if (folderin==-1) {
 			obj={
-				'path':'static/uploadfiles',
 				'deletefilename':findfirstchosed().text(),
 				'nowfolder':''
 			}
 		}
 		else{
 			obj={
-				'path':'static/uploadfiles',
 				'deletefilename':findfirstchosed().text(),
 				'nowfolder':findfirstchosed().text().slice(0,folderin)+'/'
 			}
@@ -100,11 +111,58 @@ $('#suredelete').click(function(){
 					//do nothing
 				}
 				else{
-					$('#deletefilemodal').modal('hide')
 					showdirs(data)
 				}
 			}
 		})
+	}
+	$('#deletefilemodal').modal('hide')
+})
+
+$('#surerename').click(function(){
+	if (findfirstchosed().text()=='') {
+		//do nothing
+	}
+	else{
+		var folderin=findfirstchosed().parent().attr('data-original-title').lastIndexOf('/')
+		var newname=document.getElementById('newName').value
+		if (newname=='') {
+			//do nothing
+			$('#nameError').html('ERROR!必填！<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>')
+			$('#nameError').attr('class','alert alert-danger alert-dismissible fade mt-2 show')
+		}
+		else{
+			var obj
+			if (folderin==-1) {
+				obj={
+					'originname':findfirstchosed().parent().attr('data-original-title'),
+					'nowfolder':'',
+					'newname':newname
+				}
+			}
+			else{
+				obj={
+					'originname':findfirstchosed().parent().attr('title'),
+					'nowfolder':findfirstchosed().parent().attr('title').slice(0,folderin)+'/',
+					'newname':newname
+				}
+			}
+			$.ajax({
+				url:'renamefile',
+				type:'POST',
+				data:JSON.stringify(obj),
+				async:true,
+				success:function(data){
+					if (data=='error') {
+						$('#nameError').html('ERROR!非法字符！<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>')
+					}
+					else{
+						$('#renamemodal').modal('hide')
+						showdirs(data)
+					}
+				}
+			})
+		}
 	}
 })
 
@@ -169,23 +227,42 @@ $('#backtoprevious').click(function(){
 })
 
 $('#startsettings').click(function(){
-	var folderlist=new Array()
-	var folderlistend=$('#chanelchooseend').prev().attr('id').slice(-1)
-	for (var i = 0; i <= Number(folderlistend); i++) {
-		folderlist[i]=$('#chanel'+i.toString()).children('button.btn-outline-secondary').text()
+	folderlist=new Array()
+	//先获取已经选择的文件夹
+	for (var i = 0; i < $('#collapsechanelchoose').find('.newadded').length; i++) {
+		if (i==0) {
+			folderlist[i]=$('#collapsechanelchoose').find('.newadded').eq(0).text()
+		}
+		else{
+			folderlist[i]=$('#collapsechanelchoose').find('.newadded').eq(i).children('button.btn-outline-secondary').text()
+		}
 	}
-	if (folderlist.length<=1) {
-		//do nothing
+	//检测有无音频文件夹
+	//传给后端的是folderlist(包含音频)以及audiofolder
+	if(!hasAudio){
+		//没有音频文件夹的情况下，选一个视频文件夹作为音频通道
+		$('#chooseaudiomodal').find('.list-group').html()
+		for (var i = 0; i < folderlist.length; i++) {
+			$('#chooseaudiomodal').find('.list-group').append(
+				$('<button>').attr('type','button').attr('class','list-group-item list-group-item-action').attr('onclick','chooseaudio(this)').append(
+					folderlist[i]))
+		}
+		$('#chooseaudiomodal').modal('show')
 	}
-	else{
+	if (hasAudio&&audioFolder!='') {
+		var obj={
+			'videoAudiolist':folderlist,
+			'audioFolder':audioFolder,
+			'audioByVideo':false
+		}
 		$.ajax({
 			url:'/synfolderlist',
 			type:'POST',
-			data:JSON.stringify(folderlist),
+			data:JSON.stringify(obj),
 			async:true,
 			success:function(data){
 				if(data=='success'){
-					window.location.href='/settings?chanelsum='+folderlist.length.toString()
+					window.location.href='/settings?chanelsum='+(folderlist.length-1).toString()
 				}
 				else{
 					// do nothing
@@ -195,18 +272,69 @@ $('#startsettings').click(function(){
 	}
 })
 
+function chooseaudio(thisbutton){
+	hasAudio=true
+	audioFolder=$(thisbutton).text()
+	$(thisbutton).attr('class','list-group-item list-group-item-action active')
+	$(thisbutton).siblings('button').attr('class','list-group-item list-group-item-action')
+}
+
+$('#startsynvideolist').click(function(){
+	if (hasAudio&&audioFolder!='') {
+		var obj={
+			'videoAudiolist':folderlist,
+			'audioFolder':audioFolder,
+			'audioByVideo':true
+		}
+		$.ajax({
+			url:'/synfolderlist',
+			type:'POST',
+			data:JSON.stringify(obj),
+			async:true,
+			success:function(data){
+				if (data=='success') {
+					window.location.href='/settings?chanelsum='+folderlist.length
+				}
+				else{
+					//donothing
+				}
+			}
+		})
+	}
+})
+
 //show事件
 $('#deletefilemodal').on('show.bs.modal',function(event){
 	if(findfirstchosed().text()==''){
-		$('#deletefilename').append('未选择文件！')
+		$('#deletefilename').html('未选择文件！')
 	}
 	else{
-		$('#deletefilename').append('将要删除 '+findfirstchosed().text()+' ！删除后将不可恢复！')
+		$('#deletefilename').html('将要删除 '+findfirstchosed().text()+' ！删除后将不可恢复！')
+	}
+})
+
+$('#renamemodal').on('show.bs.modal',function(event){
+	if (findfirstchosed().text()=='') {
+		$('#originName').attr('value','未选择文件！')
+	}
+	else{
+		$('#originName').attr('value',findfirstchosed().parent().attr('title'))
 	}
 })
 
 $('#collapsechanelchoose').on('show.bs.collapse',function(event){
 	chooseingchanel=true
+	//每次重新选择，hasAudio都要变为false
+	hasAudio=false
+	audioFolder=''
+	//所有原来已经点击选中的文件取消选中
+	$('#showboard').find('span.fa-check-square-o').attr('class','fa fa-square-o fa-lg mr-5 pr-5')
+	//保证每次点击合成按钮后都是新的可供选择的通道
+	$('#collapsechanelchoose').find('.newadded').remove()
+})
+
+$('#collapsechanelchoose').on('hide.bs.collapse',function(argument) {
+	chooseingchanel=false
 })
 
 //其他函数
@@ -223,70 +351,56 @@ function showdirs(data){
 	$('#showboard').html('')
 	data=JSON.parse(data)
 	for (var path in data) {
+		var basicbuttonbegin='<button type="button" class="btn btn-outline-info ml-3 border-0" onclick="chosed(this)" data-toggle="tooltip" data-original-title="'
+						+path
+						+'" title="'
+						+path
+						+'"><span class="fa fa-square-o fa-lg mr-5 pr-5"></span><br>'
+		var basicbuttonend='<br><p>'
+							+path.substr(0,20)
+							+'</p></button>'
 		if(data[path]=='dir'){
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa fa-folder fa-5x'),
-									$('<br>'),
-									$('<p>').append(path)))
+			$('#showboard').append(basicbuttonbegin
+									+'<span class="fa fa-folder fa-5x"></span>'
+									+basicbuttonend)
 		}
 		else if (data[path]=='musicdir') {
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa-stack fa-2x my-2').append(
-										$('<i>').attr('class','fa fa-folder-o fa-stack-2x'),
-										$('<i>').attr('class','fa fa-music fa-stack-1x')),
-									$('<br>'),
-									$('<p>').append(path)))
+			$('#showboard').append(basicbuttonbegin
+									+'<span class="fa-stack fa-2x my-2"><i class="fa fa-folder-o fa-stack-2x"></i><i class="fa fa-music fa-stack-1x"></i></span>'
+									+basicbuttonend)
 		}
-		else if(data[path]=='.mp3'){
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa-stack fa-2x my-2').append(
-										$('<i>').attr('class','fa fa-file-o fa-stack-2x'),
-										$('<i>').attr('class','fa fa-music fa-stack-1x')),
-									$('<br>'),
-									$('<p>').append(path)))
+		else if(only_audio_suffix.includes(data[path].toLowerCase())){
+			$('#showboard').append(basicbuttonbegin
+									+'<span class="fa-stack fa-2x my-2"><i class="fa fa-file-o fa-stack-2x"></i><i class="fa fa-music fa-stack-1x"></i></span>'
+									+basicbuttonend)
 		}
-		else if(data[path]=='.mp4'){
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<img>').attr('src','static/uploadfiles/'+path.slice(0,-4)+'mvtojpg.jpg').attr('class','showmvimg'),
-									$('<p>').append(path)))
+		else if(video_suffix.includes(data[path].toLowerCase())){
+			$('#showboard').append(basicbuttonbegin
+									+'<img src="static/uploadfiles/'+path.slice(0,-4)+'mvtojpg.jpg" class="showmvimg">'
+									+basicbuttonend)
 		}
 		else if(data[path]=='.xml'){
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa fa-file-code-o fa-4x my-2'),
-									$('<br>'),
-									$('<p>').append(path)))
+			$('#showboard').append(basicbuttonbegin
+									+'<span class="fa fa-file-code-o fa-4x my-2"></span>'
+									+basicbuttonend)
 		}
-		else if (data[path]=='.jpg') {
+		else if (img_suffix.includes(data[path].toLowerCase())) {
 			if(path.substr(0-'mvtojpg.jpg'.length)=='mvtojpg.jpg'){
 				//do nothing
 			}
 			else{
-				$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-										$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-										$('<br>'),
-										$('<img>').attr('src','static/uploadfiles/'+path+'.jpg').attr('class','showmvimg'),
-										$('<p>').append(path)))
+				$('#showboard').append(basicbuttonbegin
+										+'<img src="static/uploadfiles/'+path+'" class="showmvimg">'
+										+basicbuttonend)
 			}
 		}
 		else{
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa fa-file-o fa-4x my-2'),
-									$('<br>'),
-									$('<p>').append(path)))
+			$('#showboard').append(basicbuttonbegin
+									+'<span class="fa fa-file-o fa-4x my-2"></span>'
+									+basicbuttonend)
 		}
 	}
+	$('[data-toggle="tooltip"]').tooltip()
 	if (chooseingchanel==true) {
 		if($('#collapsechanelchoose').find('button.btn-outline-secondary').length==0){
 			//do nothing
@@ -296,8 +410,7 @@ function showdirs(data){
 				var chosedname=$(this).text()
 				$('#showboard').find('p').each(function(){
 					if ($(this).text()==chosedname) {
-						console.log($(this).parent().find('span').last().attr('class'))
-						$(this).parent().children('span.fa-square-o').html().replace('fa-square-o','fa-check-square-o')
+						$(this).parent().find('span').first().attr('class','fa fa-check-square-o fa-lg mr-5 pr-5')
 					}
 				})
 			})
@@ -306,5 +419,11 @@ function showdirs(data){
 }
 
 function findfirstchosed(){
-	return $('#showboard').children('button').children('span.fa-check-square-o').siblings('p')
+	return $('#showboard').children('button').children('span.fa-check-square-o').first().siblings('p')
+}
+
+//oninput事件，随时监听input的输入值，一旦输入就会执行下面的函数
+var nameInfo=function(){
+	$('#nameError').attr('class','alert alert-danger alert-dismissible fade mt-2')
+	$('#nameError').html('')
 }

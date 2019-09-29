@@ -23,7 +23,7 @@
         <div class="row mt-4 bg-light" id="function_area">
           <button type="button" class="btn btn-secondary my-3 ml-5" data-toggle="collapse" data-target="#collapsechanelchoose" aria-expanded="false" aria-controls="collapseExample"><span class="fa fa-scissors mr-1"></span>合成</button>
           <button type="button" class="btn btn-secondary my-3 ml-3" data-toggle="modal" data-target="#deletefilemodal"><span class="fa fa-trash-o mr-1"></span>删除</button>
-          <button type="button" class="btn btn-secondary my-3 ml-3"><span class="fa fa-pencil mr-1"></span>重命名</button>
+          <button type="button" class="btn btn-secondary my-3 ml-3" data-toggle="modal" data-target="#renamemodal"><span class="fa fa-pencil mr-1"></span>重命名</button>
           <button type="button" class="btn btn-secondary ml-3 my-3" id="openfolder"><span class="fa fa-folder-open mr-1"></span>打开文件夹</button>
           <button type="button" class="btn btn-secondary my-3 ml-3" id="backtoprevious"><span class="fa fa-chevron-left mr-1"></span>返回上一级</button>
         </div>
@@ -48,7 +48,8 @@
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
-              <div class="modal-body"><p id="deletefilename"></p>
+              <div class="modal-body">
+                <p id="deletefilename"></p>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">放弃</button>
@@ -57,27 +58,77 @@
             </div>
           </div>
         </div>
+        <div class="modal fade" id="renamemodal" tabindex="-1" role="dialog" aria-labelledby="renamemodaltitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="renamemodaltitle">文件重命名</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <fieldset disabled="true">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text">文件原名</span>
+                    </div>
+                    <input type="text" class="form-control" placeholder="" aria-label="originName" id="originName">
+                  </div>
+                </fieldset>
+                <div class="input-group mt-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">文件新名</span>
+                  </div>
+                  <input type="text" class="form-control" placeholder="" aria-label="newName" id="newName" oninput="nameInfo()">
+                </div>
+                <div class="alert alert-danger alert-dismissible fade mt-2" role="alert" id="nameError">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">放弃</button>
+                <button type="button" class="btn btn-primary" id="surerename">重命名</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="chooseaudiomodal" tabindex="-1" role="dialog" aria-labelledby="chooseaudiomodaltitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="chooseaudiomodaltitle">选择音频文件夹!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                检测到未选择音频文件夹，请选一个文件夹作为音频文件夹！
+                <br>
+                <br>
+                <div class="list-group">
+                  
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="startsynvideolist">开始合成</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+<!--jquery-->
 <script type="text/javascript" src="static/js/jquery-3.4.1.min.js"></script>
+<!--bootstrap-->
 <script type="text/javascript" src="static/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
+<!--为django-csrf服务的js.cookie-->
 <script type="text/javascript" src="static/js/js.cookie.js"></script>
-<script type="text/javascript">
-  var csrftoken=Cookies.get('csrftoken')
-  function csrfSafeMethod(method){
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method))
-  }
-  $.ajaxSetup({
-    beforeSend:function(xhr,settings){
-      if (!csrfSafeMethod(settings.type)&&!this.crossDomain) {
-        xhr.setRequestHeader('X-CSRFToken',csrftoken)
-      }
-    }
-  })
-</script>
 <!--自定义js-->
+<script type="text/javascript" src="static/js/django-csrf-ajax.js"></script>
+<script type="text/javascript" src="static/js/globalvar.js"></script>
+<script type="text/javascript" src="static/js/globalfunction.js"></script>
 <script type="text/javascript" src="static/js/todo.js"></script>
 </body>
 </html>

@@ -14,3 +14,5 @@ var video_suffix=['.flv','.avi','.wmv','.asf','.wmvhd',
 var only_audio_suffix=['.wav','.flac','.ape','.m4a','.wv',
 						'.mp3','.m4b','.m4p','.m4r','.m4v',
 						'.aac','.opus']
+
+var img_suffix=['.bmp','.jpg','.jpeg','.png','.gif']

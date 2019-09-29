@@ -3,8 +3,6 @@
 var uploadfoldergroupnum=0
 
 window.onload = function(){
-	$('#header').load('header')
-	$('nav.col-2').load('navbar')
 }
 
 //click事件
@@ -18,7 +16,7 @@ var adduploadfolder=function(){
 				$('<input>').attr('type','file').attr('class','custom-file-input').attr('id','inputfolder'+uploadfoldergroupnum.toString()).attr('webkitdirectory','true').attr('onchange','fileschosed(this.files,this)'),
 				$('<label>').attr('class','custom-file-label').attr('for','inputfolder'+uploadfoldergroupnum.toString()).attr('id','inputfolderlabel'+uploadfoldergroupnum.toString()).append('选择文件夹...')),
 			$('<div>').attr('class','input-group-append').append(
-				$('<button>').attr('onclick','adduploadfolder()').attr('class','btn btn-outline-secondary').attr('type','button').attr('data-toggle','tooltip').attr('data-placement','left').attr('title','添加上传框').append(
+				$('<button>').attr('onclick','adduploadfolder()').attr('class','btn btn-outline-secondary').attr('type','button').attr('data-toggle','tooltip').attr('data-placement','bottom').attr('title','添加上传框').append(
 					$('<span>').attr('class','fa fa-plus')))),
 		$('<div>').attr('id','uploadfolderappendprogress'+uploadfoldergroupnum.toString()))
 }

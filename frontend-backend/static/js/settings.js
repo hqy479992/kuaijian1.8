@@ -1,38 +1,43 @@
 //全局变量
-var task_name='',
-	head_duration=10,
-	tail_duration=10,
-	window_size=[0,125],
-	min_output_duration=[10],
-	max_output_duration=[20]
+
+//这里与后端传给算法的数据保持一致，使用js中的对象来对等于python的字典
+var config={}
+//本次合成名
+var task_name=''
 
 window.onload=function(){
-	for (var i = 0; i < getParams('chanelsum'); i++) {
-		min_output_duration[i]=10
-		max_output_duration[i]=20
-		if (i==0) 
-		{
-			window_size[i]=0
-		}
-		else
-		{
-			window_size[i]=125
-		}
-	}
-	$('.headduration').attr('value',head_duration)
-	$('.tailduration').attr('value',tail_duration)
+	//显示多个输入框，可以考虑给输入框加入title
 	for (var i = 0; i < getParams('chanelsum'); i++) {
 		if (i==0) {
-			$('.windowsize').children('div.input-group-append').prev().attr('value',window_size[i])
-			$('.minoutputduration').children('div.input-group-append').prev().attr('value',min_output_duration[i])
-			$('.maxoutputduration').children('div.input-group-append').prev().attr('value',max_output_duration[i])
+			$('.windowsize').children('div.input-group-append').prev().attr('title','')
+			$('.minoutputduration').children('div.input-group-append').prev()
+			$('.maxoutputduration').children('div.input-group-append').prev()
 		}
 		else{
-			$('.windowsize').children('div.input-group-append').before('<input type="text" class="form-control" value="'+window_size[i].toString()+'">')
-			$('.minoutputduration').children('div.input-group-append').before('<input type"text" class="form-control" value="'+min_output_duration[i].toString()+'">')
-			$('.maxoutputduration').children('div.input-group-append').before('<input type="text" class="form-control" value="'+max_output_duration[i].toString()+'">')
+			$('.windowsize').children('div.input-group-append').before('<input type="text" class="form-control" value="">')
+			$('.minoutputduration').children('div.input-group-append').before('<input type"text" class="form-control" value="">')
+			$('.maxoutputduration').children('div.input-group-append').before('<input type="text" class="form-control" value="">')
 		}
 	}
+	//先请求后台config默认值
+	var obj={
+		'chanelsum':getParams('chanelsum')
+	}
+	$.ajax({
+		url:'/getDefaultConfig',
+		type:'POST',
+		data:JSON.stringify(obj),
+		async:true,
+		success:function(data){
+			if (data=='error') {
+				//do nothing
+			}
+			else{
+				config=JSON.parse(data)
+				showconfig(config)
+			}
+		}
+	})
 }
 
 //click事件
@@ -40,32 +45,18 @@ $('#startsyn').click(function(){
 	task_name=$($('div.col-10 input')[0]).val()
 	if (task_name=='') {
 		//必须填写！
-		alert('error')
+		$($('div.col-10 input')[0]).attr('placeholder','ERROR!必须填写！')
 	}
-	head_duration=$($('div.col-10 input')[1]).val()
-	tail_duration=$($('div.col-10 input')[2]).val()
-	var j=0,k=0,n=0
-	for (var i = 3; i < $('div.col-10 input').length; i++) {
-		if (i<3+($('div.col-10 input').length-3)/3) {
-			window_size[j]=$($('div.col-10 input')[i]).val()
-			j++
-		}
-		else if (i<3+($('div.col-10 input').length-3)*2/3) {
-			min_output_duration[k]=$($('div.col-10 input')[i]).val()
-			k++
-		}
-		else{
-			max_output_duration[n]=$($('div.col-10 input')[i]).val()
-			n++
-		}
+	config['head_duration']=$($('div.col-10 input')[1]).val()
+	config['tail_duration']=$($('div.col-10 input')[2]).val()
+	for (var i = 0; i < getParams('chanelsum'); i++) {
+		config['window_size_'+i.toString()]=$('.windowsize').children('input').eq(i).attr('value')
+		config['min_output_duration_'+i.toString()]=$('.minoutputduration').children('input').eq(i).attr('value')
+		config['max_output_duration_'+i.toString()]=$('.maxoutputduration').children('input').eq(i).attr('value')
 	}
 	var obj={
-		'task_name':task_name,
-		'window_size':window_size,
-		'min_output_duration':min_output_duration,
-		'max_output_duration':max_output_duration,
-		'head_duration':head_duration,
-		'tail_duration':tail_duration,
+		'config':config,
+		'task_name':task_name
 	}
 	$.ajax({
 		url:'/settingsvalue',
@@ -78,17 +69,27 @@ $('#startsyn').click(function(){
 			}
 			else{
 				//do nothing
+				console.log('error')
 			}
 		}
 	})
 })
 
-//其他函数
-function getParams(key){
-	var reg=new RegExp('(^|&)'+key+'=([^&]*)(&|$)')
-	var r=window.location.search.substr(1).match(reg)
-	if (r!=null) {
-		return decodeURI(r[2])
+//其他事件
+function showconfig(config){
+	$('.headduration').attr('value',config['head_duration'])
+	$('.tailduration').attr('value',config['tail_duration'])
+	for (var i = 0; i < getParams('chanelsum'); i++) {
+		if (i==0) {
+			$('.windowsize').children('input').eq(0).attr('value',config['window_size_0'])
+			$('.minoutputduration').children('input').eq(0).attr('value',config['min_output_duration_0'])
+			$('.maxoutputduration').children('input').eq(0).attr('value',config['max_output_duration_0'])
+		}
+		else{
+			$('.windowsize').children('input').eq(i).attr('value',config['window_size_'+i.toString()])
+			$('.minoutputduration').children('input').eq(i).attr('value',config['min_output_duration_'+i.toString()])
+			$('.maxoutputduration').children('input').eq(i).attr('value',config['max_output_duration_'+i.toString()])
+		}
 	}
-	return null
+	$('[data-toggle="tooltip"]').tooltip()
 }
