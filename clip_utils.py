@@ -5,7 +5,7 @@ import os
 import random
 from pydub import AudioSegment
 from soundxHandler import SoundxHandler
-from global_var import _init, set_val
+from process_bar import ProcessBar
 
 class ClipControler():
 
@@ -56,6 +56,7 @@ class ClipControler():
         self._resolution = None
         self._overall_view_remainder_length = None
         self._syn_handler = syn_handler
+        self.__process_bar = ProcessBar()
 
         # initialize video track
         for i in range(len(video_path_list)):
@@ -232,19 +233,17 @@ class ClipControler():
         if self._video_track_list[0].get_remainder_length() // self._fps < temp_audio_length:
             print('\n\n\n',temp_audio_length,'!!!!!!!\n\n\n!!!!!!!!!!!!!!!!!!')
             # length of audio > length of video
-            _init()
-            set_val('_overall_view_length', self._video_track_list[0].get_remainder_length())
+            self.__process_bar.set('_overall_view_length', self._video_track_list[0].get_remainder_length())
             self._overall_view_remainder_length = self._video_track_list[0].get_remainder_length()
-            set_val('_overall_view_remainder_length', self._overall_view_remainder_length)
+            self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
             temp_audio = temp_audio[:int(self._overall_view_remainder_length * 1000 // self._fps)]
 
         else:
             # length of audio < length of video
             print('\n\n\n',temp_audio_length,'!!!!!!!!!!!!!!!!!!!!!!!!!')
             self._overall_view_remainder_length = temp_audio_length * self._fps
-            _init()
-            set_val('_overall_view_length', self._overall_view_remainder_length)
-            set_val('_overall_view_remainder_length', self._overall_view_remainder_length)
+            self.__process_bar.set('_overall_view_length', self._overall_view_remainder_length)
+            self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
         
         # output temp audio
         print(len(temp_audio)/1000)
@@ -277,7 +276,7 @@ class ClipControler():
             # read next frames of all video track
             temp_frames = self._read_next_frame()
             self._overall_view_remainder_length -= 1
-            set_val('_overall_view_remainder_length', self._overall_view_remainder_length)
+            self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
             print(self._overall_view_remainder_length)
 
             # overall view video is used up
@@ -381,7 +380,7 @@ class ClipControler():
                 # read next frames of all video track
                 temp_frames = self._read_next_frame()
                 self._overall_view_remainder_length -= 1
-                set_val('_overall_view_remainder_length', self._overall_view_remainder_length)
+                self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
                 temp_output_point -= 1
                 print(temp_output_point, temp_output_duration)
                 print(current_track_number)
@@ -420,7 +419,7 @@ class ClipControler():
 
         while self._overall_view_remainder_length > 0:
             self._overall_view_remainder_length -= 1
-            set_val('_overall_view_remainder_length', self._overall_view_remainder_length)
+            self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
             print(self._overall_view_remainder_length)
             self._temp_video_writer.write(self._video_track_list[0].next_frame())
 
@@ -478,6 +477,9 @@ class ClipControler():
                 os.remove(self._temp_audio_path)
             except Exception as e:
                 return 1
+
+    def get_process(self):
+        return self.__process_bar.get_process()
 
 
 

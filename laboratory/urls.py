@@ -21,18 +21,18 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     #index
-    path(r'',views.indexhtml),
-    path(r'index',views.indexhtml),
+    path(r'', views.index_html),
+    path(r'index', views.index_html),
     path(r'uploadfile',views.uploadfile),
 
     #guide
-    path(r'guide',views.guidehtml),
+    path(r'guide', views.guide_html),
 
     #question
-    path(r'question',views.questionhtml),
+    path(r'question', views.question_html),
 
     #todo
-    path(r'todo',views.todohtml),
+    path(r'todo', views.todo_html),
     path(r'getdirsbyupload',views.getdirsbyupload),
     path(r'openfolder',views.openfolder),
     path(r'backtoprevious',views.backtoprevious),
@@ -41,28 +41,31 @@ urlpatterns = [
     path(r'renamefile',views.renamefile),
 
     #doing
-    path(r'doing',views.doinghtml),
+    path(r'doing', views.doing_html),
     path(r'progress',views.progress),
 
     #done
-    path(r'done',views.donehtml),
+    path(r'done', views.done_html),
     path(r'resultfiles',views.resultfiles),
     path(r'downloadbigfile',views.downloadbigfile),
 
+    #stop thread
+    path(r'stop', views.stop_task),
+
     #aboutus
-    path(r'aboutus',views.aboutushtml),
+    path(r'aboutus', views.aboutus_html),
 
     #contactus
-    path(r'contactus',views.contactushtml),
+    path(r'contactus', views.contactus_html),
 
     #settings
-    path(r'settings',views.settingshtml),
+    path(r'settings', views.settings_html),
     path(r'settingsvalue',views.settingsvalue),
     path(r'getDefaultConfig',views.getDefaultConfig),
 
     #navbar
-    path(r'navbar',views.navbarhtml),
+    path(r'navbar', views.navbar_html),
 
     #header
-    path(r'header',views.headerhtml),
+    path(r'header', views.header_html),
 ]
