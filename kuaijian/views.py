@@ -255,7 +255,8 @@ def settingsvalue(request):
     audio_path = ExtractAudioTrack(task_name, audio_list) if len(audio_list) > 1 else audio_list[0]
     syn_handler = SoundxHandler()
     dis = discriminator.YOLOv3_discriminator()
-    executor.submit(task_name, ClipControler, video_list.copy(), audio_path, "./static/resultfiles/" + task_name +  ".mp4", syn_handler, dis, conf)
+    clip_controller = ClipControler(video_list.copy(), audio_path, "./static/resultfiles/" + task_name +  ".mp4", syn_handler, dis, conf)
+    executor.submit(task_name, clip_controller)
     return HttpResponse('successful submit task '+task_name)
 
 

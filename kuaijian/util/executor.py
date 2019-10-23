@@ -6,8 +6,8 @@ class Executor:
     def __init__(self):
         self.__tasks = {}
 
-    def submit(self, task_name, cls, *args):
-        p = ClipProcess(cls, *args)
+    def submit(self, task_name, clip_controller):
+        p = ClipProcess(clip_controller)
         self.__tasks[task_name] = p
         p.start()
 
