@@ -5,7 +5,9 @@ import os
 import random
 from pydub import AudioSegment
 from soundxHandler import SoundxHandler
-from process_bar import ProcessBar
+from kuaijian.util.process_bar import ProcessBar
+
+
 
 class ClipControler():
 
@@ -34,7 +36,7 @@ class ClipControler():
     _temp_audio_path = None
     _syn_handler = None
 
-    def __init__(self, threading_number, video_path_list, audio_path, output_file_path, syn_handler, discriminator, config):
+    def __init__(self, video_path_list, audio_path, output_file_path, syn_handler, discriminator, config):
 
         """
         Input:
@@ -45,7 +47,6 @@ class ClipControler():
         """
 
         self._video_track_list = []
-        self._threading_number = threading_number
         self._video_path_list = video_path_list
         self._audio_path = audio_path
         self._config = config
@@ -478,8 +479,6 @@ class ClipControler():
             except Exception as e:
                 return 1
 
-    def get_process(self):
-        return self.__process_bar.get_process()
 
 
 

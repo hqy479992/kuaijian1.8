@@ -3,6 +3,7 @@ import json
 import os
 import shutil
 from kuaijian.util.executor import Executor
+from kuaijian.util.process_bar import ProcessBar
 
 from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import render
@@ -252,21 +253,11 @@ def settingsvalue(request):
     task_name = obj['task_name']
     conf = obj['config']
     audio_path = ExtractAudioTrack(task_name, audio_list) if len(audio_list) > 1 else audio_list[0]
-    executor.submit(task_name, exe_clip, task_name, conf, video_list.copy(), audio_path)
+    syn_handler = SoundxHandler()
+    dis = discriminator.YOLOv3_discriminator()
+    executor.submit(task_name, ClipControler, video_list.copy(), audio_path, "./static/resultfiles/" + task_name +  ".mp4", syn_handler, dis, conf)
     return HttpResponse('successful submit task '+task_name)
 
-
-def exe_clip(task_name, conf, video_ls, audio_path):
-    try:
-        # 开始合成
-        syn_handler = SoundxHandler()
-        dis = discriminator.YOLOv3_discriminator()
-        cc = ClipControler(task_name, video_ls, audio_path, "./static/resultfiles/" + task_name + ".mp4", syn_handler,
-                           dis, conf)
-        cc.run()
-        del cc
-    except Exception as e:
-        raise  e
 
 
 # doing界面
@@ -275,7 +266,7 @@ def exe_clip(task_name, conf, video_ls, audio_path):
 def progress(request):
     js_obj = json.loads(request.body.decode())
     task_name = js_obj['task_name']
-    rate = executor.get_process()
+    rate = executor.get_process(task_name)
     try:
         prog = {
             'task_name': task_name,
