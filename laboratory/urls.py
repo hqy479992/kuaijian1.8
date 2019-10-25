@@ -26,7 +26,7 @@ urlpatterns = [
 
     #index
   
-    path(r'index',views.indexhtml),
+    path(r'index',views.index_html),
     path(r'uploadfile',views.uploadfile),
 
     #guide
