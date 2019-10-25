@@ -20,9 +20,13 @@ from kuaijian import views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    #index_page
+    path(r'',views.index_pagehtml),
+    path(r'index_page',views.index_pagehtml),
+
     #index
-    path(r'', views.index_html),
-    path(r'index', views.index_html),
+  
+    path(r'index',views.indexhtml),
     path(r'uploadfile',views.uploadfile),
 
     #guide
