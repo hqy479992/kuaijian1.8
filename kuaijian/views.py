@@ -46,6 +46,9 @@ executor = Executor()
 
 
 # 界面
+def index_pagehtml(request):
+	return render(request,'index_page.html')
+    
 def index_html(request):
     return render(request, 'index.html')
 

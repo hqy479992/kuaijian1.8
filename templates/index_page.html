@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>快剪</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--bootstrap-->
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/bootstrap-reboot.min.css">
+    <!--font awesome图标-->
+    <link rel="stylesheet" type="text/css" href="static/css/font-awesome.min.css">
+    <!--toc-->
+    <!--   <link rel="stylesheet" type="text/css" href="static/css/bootstrap-toc.min.css">-->
+    <!--自定义css-->
+    <link rel="stylesheet" type="text/css" href="static/css/style.css">
+</head>
+<body>
+
+<div id="header"></div>
+<div class="container-fluid mainboard">
+    <div class="row maincontent">
+        <nav class="col-2 bg-dark sidebar pt-2 text-center">
+        </nav>
+        <div class="col-9 ml-5 mt-5">
+            <div id="myCarousel" class="carousel slide" data-ride="carousel">
+                <!-- 指示符 -->
+                <ul class="carousel-indicators">
+                    <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+                    <li data-target="#myCarousel" data-slide-to="1"></li>
+                    <li data-target="#myCarousel" data-slide-to="2"></li>
+                </ul>
+                <!-- 轮播图片 -->
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                      	<img src="../static/img/2.jpg" alt="Second slide">
+                    </div>
+                    <div class="carousel-item">
+                       	<img src="../static/img/1.jpg" alt="First slide">
+                    </div>
+                </div>
+                <!-- 左右切换按钮 -->
+                <a class="carousel-control-prev" href="#myCarousel" data-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </a>
+                <a class="carousel-control-next" href="#myCarousel" data-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="static/js/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="static/js/bootstrap.bundle.min.js"></script>
+    <!--自定义js-->
+    <script type="text/javascript" src="static/js/globalfunction.js">
+    </script>
+</body>
+</html>

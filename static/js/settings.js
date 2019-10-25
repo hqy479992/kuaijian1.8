@@ -65,7 +65,7 @@ $('#startsyn').click(function(){
 		async:true,
 		success:function(data){
 			if (data=='success') {
-				window.location.href='/doing'
+				window.location.href='/moredoing?task_name='+task_name;
 			}
 			else{
 				//do nothing
