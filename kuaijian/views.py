@@ -255,12 +255,23 @@ def settingsvalue(request):
     obj = json.loads(request.body.decode())
     task_name = obj['task_name']
     conf = obj['config']
+    process_bar = ProcessBar()
     audio_path = ExtractAudioTrack(task_name, audio_list) if len(audio_list) > 1 else audio_list[0]
-    syn_handler = SoundxHandler()
-    dis = discriminator.YOLOv3_discriminator()
-    clip_controller = ClipControler(video_list.copy(), audio_path, "./static/resultfiles/" + task_name +  ".mp4", syn_handler, dis, conf)
-    executor.submit(task_name, clip_controller)
+    executor.submit(task_name, process_bar, exe_clip, task_name, process_bar, conf, video_list.copy(), audio_path)
     return HttpResponse('successful submit task '+task_name)
+
+
+def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
+    try:
+        # 开始合成
+        syn_handler = SoundxHandler()
+        dis = discriminator.YOLOv3_discriminator()
+        cc = ClipControler(task_name, process_bar, video_ls, audio_path, "./static/resultfiles/" + task_name + ".mp4", syn_handler,
+                           dis, conf)
+        cc.run()
+        del cc
+    except Exception as e:
+        raise  e
 
 
 
@@ -270,8 +281,8 @@ def settingsvalue(request):
 def progress(request):
     js_obj = json.loads(request.body.decode())
     task_name = js_obj['task_name']
-    rate = executor.get_process(task_name)
     try:
+        rate = executor.get_process(task_name)
         prog = {
             'task_name': task_name,
             'progress_rate': rate}

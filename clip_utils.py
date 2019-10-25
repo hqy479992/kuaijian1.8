@@ -36,7 +36,7 @@ class ClipControler():
     _temp_audio_path = None
     _syn_handler = None
 
-    def __init__(self, video_path_list, audio_path, output_file_path, syn_handler, discriminator, config):
+    def __init__(self, task_name, process_bar, video_path_list, audio_path, output_file_path, syn_handler, discriminator, config):
 
         """
         Input:
@@ -46,6 +46,7 @@ class ClipControler():
         config: dict, for further configuration.
         """
 
+        self._task_name = task_name
         self._video_track_list = []
         self._video_path_list = video_path_list
         self._audio_path = audio_path
@@ -57,7 +58,7 @@ class ClipControler():
         self._resolution = None
         self._overall_view_remainder_length = None
         self._syn_handler = syn_handler
-        self.__process_bar = ProcessBar()
+        self.__process_bar = process_bar
 
         # initialize video track
         for i in range(len(video_path_list)):
@@ -144,16 +145,16 @@ class ClipControler():
         """
 
         # calculate the bias time
-        self._syn_handler.fun2(audio_path, video_path, "./temp/" + str(self._threading_number) + ".txt")
+        self._syn_handler.fun2(audio_path, video_path, "./temp/" + str(self._task_name) + ".txt")
         
         # read the bias time
-        temp_txt_file = open("./temp/" + str(self._threading_number) + ".txt")
+        temp_txt_file = open("./temp/" + str(self._task_name) + ".txt")
         temp_str = temp_txt_file.readline()
         bias_time = float(temp_str.split("_")[-1])
         temp_txt_file.close()
 
         # remove temp txt file
-        os.remove("./temp/" + str(self._threading_number) + ".txt")
+        os.remove("./temp/" + str(self._task_name) + ".txt")
 
         return bias_time
 
@@ -248,7 +249,7 @@ class ClipControler():
         
         # output temp audio
         print(len(temp_audio)/1000)
-        self._temp_audio_path = "./temp/" + str(self._threading_number) + ".mp3"
+        self._temp_audio_path = "./temp/" + str(self._task_name) + ".mp3"
         temp_audio.export(self._temp_audio_path, "mp3")
 
         print("Finish audio synchronization.")

@@ -1,21 +1,21 @@
-from kuaijian.util.process_x import ClipProcess
+from multiprocessing import Process
 
 
 class Executor:
 
     def __init__(self):
         self.__tasks = {}
+        self.__process_bars = {}
 
-    def submit(self, task_name, clip_controller):
-        p = ClipProcess(clip_controller)
+    def submit(self, task_name, process_bar, func, *args):
+        p = Process(target=func, args=args)
         self.__tasks[task_name] = p
+        self.__process_bars[task_name] = process_bar
         p.start()
 
     def stop(self, task_name):
         self.__tasks[task_name].terminate()
-        inner_class = self.__tasks[task_name].get_inner_class()
-        del inner_class
         print("successful stopped task {}".format(task_name))
 
     def get_process(self, task_name):
-        return self.__tasks[task_name].get_process()
+        return self.__process_bars[task_name].get_process()
