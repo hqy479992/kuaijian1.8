@@ -56,7 +56,7 @@ function barMoreTask(list) {
 
 //多进程
 function moreTask(task_list) {
-	if(task_list.length>1){
+	if(task_list.length>0){
 		for (var item of task_list) {
 			$('.bar').append(`
 			<div class="row bar-list">
