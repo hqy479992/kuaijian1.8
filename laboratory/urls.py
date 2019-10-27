@@ -47,6 +47,8 @@ urlpatterns = [
     #doing
     path(r'doing', views.doing_html),
     path(r'progress',views.progress),
+    path(r'get_all_task',views.get_all_task),
+    path(r'stop_task',views.stop_task),
 
     #done
     path(r'done', views.done_html),

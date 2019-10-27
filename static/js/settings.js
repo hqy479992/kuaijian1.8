@@ -70,11 +70,13 @@ $('#startsyn').click(function(){
 			data:JSON.stringify(obj),
 			async:true,
 			success:function(data){
-				if (data=='success') {
-					window.location.href='/moredoing?task_name='+task_name;
+				if (data=='error') {
+					//error
 				}
 				else{
 					//do nothing
+					window.location.href='/doing'//?task_name=+JSON.parse(data)
+					console.log(data);
 				}
 			}
 		})

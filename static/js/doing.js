@@ -1,5 +1,5 @@
 //全局变量
-
+/*
 window.onload=function(){
 	get_progress_rate()
 	setInterval(function(){get_progress_rate()}, 5000)
@@ -28,4 +28,4 @@ function get_progress_rate(){
 			}
 		}
 	})
-}
+}*/

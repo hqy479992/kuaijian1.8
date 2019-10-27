@@ -247,13 +247,16 @@ def getDefaultConfig(request):
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
 def settingsvalue(request):
-    obj = json.loads(request.body.decode())
-    task_name = obj['task_name']
-    conf = obj['config']
-    process_bar = ProcessBar()
-    audio_path = ExtractAudioTrack(task_name, audio_list) if len(audio_list) > 1 else audio_list[0]
-    executor.submit(task_name, process_bar, exe_clip, task_name, process_bar, conf, video_list.copy(), audio_path)
-    return HttpResponse('successful submit task '+task_name)
+    try:
+        obj = json.loads(request.body.decode())
+        task_name = obj['task_name']
+        conf = obj['config']
+        process_bar = ProcessBar()
+        audio_path = ExtractAudioTrack(task_name, audio_list) if len(audio_list) > 1 else audio_list[0]
+        executor.submit(task_name, process_bar, exe_clip, task_name, process_bar, conf, video_list.copy(), audio_path)
+        return HttpResponse(json.dumps(task_name))
+    except:
+        return HttpResponse('error')
 
 
 def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
@@ -275,6 +278,7 @@ def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
 @ensure_csrf_cookie
 def progress(request):
     js_obj = json.loads(request.body.decode())
+    print(js_obj)
     task_name = js_obj['task_name']
     try:
         rate = executor.get_process(task_name)
@@ -289,6 +293,16 @@ def progress(request):
         }
         return HttpResponse(json.dumps(prog))
 
+@require_http_methods(['POST'])
+@ensure_csrf_cookie
+def get_all_task(request):
+    try:
+        tasks = executor.get_all_tasks()
+        print(tasks)
+        return HttpResponse(json.dumps(tasks))
+    except Exception as e:
+        raise e
+        return HttpResponse('error')
 
 # done界面
 @require_http_methods(['POST'])
@@ -325,10 +339,13 @@ def downloadbigfile(request):
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
 def stop_task(request):
-    js_obj = json.loads(request.body.decode())
-    task_name = js_obj['task_name']
-    executor.stop(task_name)
-    return HttpResponse(json.dumps({'result': 'stopped'}))
+    try:
+        js_obj = json.loads(request.body.decode())
+        task_name = js_obj['task_name']
+        executor.stop(task_name)
+        return HttpResponse(json.dumps({'result': 'stopped'}))
+    except:
+        return HttpResponse('error')
 
 
 # 其他函数

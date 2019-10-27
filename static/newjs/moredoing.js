@@ -2,14 +2,26 @@
 var task_list = [];
 
 window.onload = function () {
-	var query = window.location.search.substring(1),//获取url的参数，从而获取任务名
-		task_name = query.split("=")[1];
-	if (task_list.indexOf(task_name) !== -1) {
-		task_list.push(task_name);
-		console.log(task_name)
-	}
-	moreTask(task_list);
-	setInterval(function () { barMoreTask(task_list) }, 5000)
+    var obj={
+        'getAllTasks':'ger_all_task'
+    }
+    $.ajax({
+        url:'/get_all_task',
+        type:'POST',
+        data:JSON.stringify(obj),
+        async:true,
+        success:function(data){
+            if(data=='error'){
+                //error
+            }
+            else{
+                task_list=JSON.parse(data)
+                moreTask(task_list);
+	            setInterval(function () { barMoreTask(task_list) }, 5000)
+            }
+        }
+    })
+
 }
 function getProgress(obj){
 	$.ajax({
@@ -18,7 +30,6 @@ function getProgress(obj){
 		data: JSON.stringify(obj),
 		async: true,
 		success: function (data) {
-			console.log(data)
 			if (data == 'error') {
 				//do nothing
 			}
@@ -71,9 +82,28 @@ function moreTask(task_list) {
 function closeBar(e, name) {
 	// console.log($(e.target).parent().parent());//隐藏
 	// console.log(task_list,name)
+	console.log(name)
 	$(e.target).parent().parent().remove();
 	name = name.toString();
+	console.log(name)
 	task_list.splice(task_list.indexOf(name), 1);
+	var obj={
+	    'task_name':name
+	}
+	$.ajax({
+	    url:'/stop_task',
+	    type:'POST',
+	    data:JSON.stringify(obj),
+	    async:true,
+	    success:function(data){
+            if(data=='error'){
+
+            }
+            else{
+                console.log(data)
+            }
+	    }
+	})
 	console.log(task_list)
 }
 

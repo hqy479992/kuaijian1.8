@@ -15,7 +15,12 @@ class Executor:
 
     def stop(self, task_name):
         self.__tasks[task_name].terminate()
+        del self.__tasks[task_name]
+        del self.__process_bars[task_name]
         print("successful stopped task {}".format(task_name))
 
     def get_process(self, task_name):
         return self.__process_bars[task_name].get_process()
+
+    def get_all_tasks(self):
+        return list(self.__tasks.keys())
