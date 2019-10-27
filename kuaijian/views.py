@@ -15,7 +15,6 @@ from clip_utils import ClipControler
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
 
-
 # Create your views here.
 # 文件内全局变量
 audio_list = []
@@ -151,15 +150,12 @@ def synfolderlist(request):
                 # 音频列表
                 filelistindir(os.path.join('static/uploadfiles', obj['audioFolder']), audio_list, video_suffix)
                 audio_list.sort()
-        print(audio_list)
         # 视频列表
         for i in range(0, len(obj['videoAudiolist'])):
             tem_video_list = []
             filelistindir(os.path.join('static/uploadfiles', obj['videoAudiolist'][i]), tem_video_list, video_suffix)
             tem_video_list.sort()
             video_list.append(tem_video_list)
-        print(video_list)
-        print(audio_list)
         return HttpResponse('success')
     except Exception as e:
         raise e
@@ -235,7 +231,7 @@ def backtoprevious(request):
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
 def getDefaultConfig(request):
-    global config
+    global config,video_list
     try:
         obj = json.loads(request.body.decode())
         chanelsum = int(obj['chanelsum'])  # 仅指视频通道个数,json传过来是字符串，转化为数字
@@ -243,10 +239,9 @@ def getDefaultConfig(request):
             config['window_size_' + str(i)] = config['window_size_1']
             config['min_output_duration_' + str(i)] = config['min_output_duration_1']
             config['max_output_duration_' + str(i)] = config['max_output_duration_1']
-        return HttpResponse(json.dumps(config))
+        return HttpResponse(json.dumps({'config':config,'video_list':video_list}))
     except Exception as e:
         return HttpResponse('error')
-        raise e
 
 
 @require_http_methods(['POST'])

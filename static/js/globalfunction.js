@@ -16,3 +16,9 @@ function getParams(key){
 	}
 	return null
 }
+
+//oninput事件，随时监听input的输入值，一旦输入就会执行下面的函数(开始输入就将alert框删除)
+var nameInfo=function(){
+	$('#nameError').attr('class','fade')
+	$('#nameError').html('')
+}

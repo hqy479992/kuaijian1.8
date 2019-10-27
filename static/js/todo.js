@@ -7,6 +7,8 @@
 var chooseingchanel=false
 //所选文件夹中是否含有音频文件夹
 var hasAudio=false
+//是否是视频作音频,在用户不小心点击了视频文件夹作音频后有点击了其他地方
+var hasVideoAsAudio=false
 //音频文件夹名字记录下来
 var audioFolder=''
 //已选中的通道文件夹数组
@@ -154,7 +156,8 @@ $('#surerename').click(function(){
 				async:true,
 				success:function(data){
 					if (data=='error') {
-						$('#nameError').html('ERROR!非法字符！<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>')
+						$('#nameError').html('ERROR!已有同名文件夹！<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>')
+						$('#nameError').attr('class','alert alert-danger alert-dismissible fade mt-2 show')
 					}
 					else{
 						$('#renamemodal').modal('hide')
@@ -249,7 +252,7 @@ $('#startsettings').click(function(){
 		}
 		$('#chooseaudiomodal').modal('show')
 	}
-	if (hasAudio&&audioFolder!='') {
+	if (hasAudio&&audioFolder!=''&&hasVideoAsAudio==false) {
 		var obj={
 			'videoAudiolist':folderlist,
 			'audioFolder':audioFolder,
@@ -271,10 +274,21 @@ $('#startsettings').click(function(){
 			}
 		})
 	}
+	else if (hasAudio&&audioFolder!=''&&hasVideoAsAudio==true) {
+		//用户误点击后重新点击选择
+		$('#chooseaudiomodal').find('.list-group').html('')
+		for (var i = 0; i < folderlist.length; i++) {
+			$('#chooseaudiomodal').find('.list-group').append(
+				$('<button>').attr('type','button').attr('class','list-group-item list-group-item-action').attr('onclick','chooseaudio(this)').append(
+					folderlist[i]))
+		}
+		$('#chooseaudiomodal').modal('show')
+	}
 })
 
 function chooseaudio(thisbutton){
 	hasAudio=true
+	hasVideoAsAudio=true
 	audioFolder=$(thisbutton).text()
 	$(thisbutton).attr('class','list-group-item list-group-item-action active')
 	$(thisbutton).siblings('button').attr('class','list-group-item list-group-item-action')
@@ -282,7 +296,6 @@ function chooseaudio(thisbutton){
 
 $('#startsynvideolist').click(function(){
 	if (hasAudio&&audioFolder!='') {
-		console.log(JSON.stringify(obj))
 		var obj={
 			'videoAudiolist':folderlist,
 			'audioFolder':audioFolder,
@@ -320,7 +333,7 @@ $('#renamemodal').on('show.bs.modal',function(event){
 		$('#originName').attr('value','未选择文件！')
 	}
 	else{
-		$('#originName').attr('value',findfirstchosed().parent().attr('title'))
+		$('#originName').attr('value',findfirstchosed().text())
 	}
 })
 
@@ -353,7 +366,7 @@ function showdirs(data){
 	$('#showboard').html('')
 	data=JSON.parse(data)
 	for (var path in data) {
-		var basicbuttonbegin='<button type="button" class="btn btn-outline-info ml-3 border-0" onclick="chosed(this)" data-toggle="tooltip" data-original-title="'
+		var basicbuttonbegin='<button type="button" class="btn btn-outline-info ml-3 border-0" onclick="chosed(this)" data-toggle="tooltip" data-placement="bottom" data-original-title="'
 						+path
 						+'" title="'
 						+path
@@ -422,10 +435,4 @@ function showdirs(data){
 
 function findfirstchosed(){
 	return $('#showboard').children('button').children('span.fa-check-square-o').first().siblings('p')
-}
-
-//oninput事件，随时监听input的输入值，一旦输入就会执行下面的函数
-var nameInfo=function(){
-	$('#nameError').attr('class','alert alert-danger alert-dismissible fade mt-2')
-	$('#nameError').html('')
 }

@@ -20,16 +20,15 @@
       <nav class="col-2 bg-dark sidebar pt-2">
       </nav>
       <div class="col-10">
-        <div class="row mt-5 pt-5">
+        <div class="row mt-5">
           <div class="input-group col">
             <div class="input-group-prepend">
               <span class="input-group-text">本次合成名字</span>
             </div>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" oninput="nameInfo()">
           </div>
         </div>
-        <div class="row mt-1 py-1">
-          
+        <div class="fade" role="alert" id="nameError">
         </div>
         <div class="row mt-5">
           <div class="input-group col">
@@ -45,13 +44,24 @@
             <div class="input-group-prepend">
               <span class="input-group-text">结尾远景时长</span>
             </div>
-            <input type="text" class="form-control tailduration" aria-label="结尾远景时长" title="结尾远景时长" data-toggle="tooltip">
+            <input type="text" class="form-control tailduration">
             <div class="input-group-append">
               <span class="input-group-text">秒</span>
             </div>
           </div>
         </div>
         <div class="row mt-5">
+          <div class="input-group col chanelnum">
+            <div class="input-group-prepend">
+              <span class="input-group-text">&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</span>
+            </div>
+            <input type="text" class="form-control">
+            <div class="input-group-append">
+              <span class="input-group-text">&emsp;</span>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-2">
           <div class="input-group col windowsize">
             <div class="input-group-prepend">
               <span class="input-group-text">通道窗口大小</span>
