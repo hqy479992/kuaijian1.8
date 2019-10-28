@@ -26,4 +26,7 @@ class Executor:
         return list(self._tasks.keys())
 
     def get_process(self, task_name):
-        return self._queues[task_name].get()
+        try:
+            return self._queues[task_name].get(timeout=1)
+        except:
+            return 0.01
