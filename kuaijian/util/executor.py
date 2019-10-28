@@ -29,7 +29,7 @@ class Executor:
 
     def get_process(self, task_name):
         try:
-            rate = self._queues[task_name].get(timeout=1)
+            rate = self._queues[task_name].get_nowait()
             self._rate_cache[task_name] = rate
             return rate
         except:
