@@ -36,7 +36,7 @@ class ClipControler():
     _temp_audio_path = None
     _syn_handler = None
 
-    def __init__(self, task_name, process_bar, video_path_list, audio_path, output_file_path, syn_handler, discriminator, config):
+    def __init__(self, task_name, queue, video_path_list, audio_path, output_file_path, syn_handler, discriminator, config):
 
         """
         Input:
@@ -58,7 +58,8 @@ class ClipControler():
         self._resolution = None
         self._overall_view_remainder_length = None
         self._syn_handler = syn_handler
-        self.__process_bar = process_bar
+        self._queue = queue
+        self._total = 0.0
 
         # initialize video track
         for i in range(len(video_path_list)):
@@ -72,7 +73,7 @@ class ClipControler():
                 self._resolution = temp_video_queue.get_resolution()
             else:
                 if self._fps != int(temp_video_queue.get_fps()):
-                    raise Exception("Different FPS!")    
+                    raise Exception("Different FPS!")
                 if self._resolution != temp_video_queue.get_resolution():
                     raise Exception("Different resolution!")
 
@@ -90,11 +91,11 @@ class ClipControler():
 
         # initialize video writer
         self._temp_video_path = os.path.splitext(self._output_file_path)[0] + "_temp.mp4"
-        self._temp_video_writer = cv2.VideoWriter(self._temp_video_path, 
-                                                cv2.VideoWriter_fourcc("X","V","I","D"), 
-                                                int(self._fps), 
+        self._temp_video_writer = cv2.VideoWriter(self._temp_video_path,
+                                                cv2.VideoWriter_fourcc("X","V","I","D"),
+                                                int(self._fps),
                                                 self._resolution)
-    
+
     def run(self):
         print(self.stage1_synchonization())
         print(self.stage2_overall_view_designated_duration())
@@ -117,7 +118,7 @@ class ClipControler():
         return temp_frame_list
 
     def _compose_video_audio(self, video_path, audio_path):
-        
+
         """
         Compose video and audio.
 
@@ -134,7 +135,7 @@ class ClipControler():
         return 0
 
     def _syn_helper(self, audio_path, video_path):
-        
+
         """
         Hepler function of synchronization. Input path of audio and video, and return the bias time in float.
 
@@ -146,7 +147,7 @@ class ClipControler():
 
         # calculate the bias time
         self._syn_handler.fun2(audio_path, video_path, "./temp/" + str(self._task_name) + ".txt")
-        
+
         # read the bias time
         temp_txt_file = open("./temp/" + str(self._task_name) + ".txt")
         temp_str = temp_txt_file.readline()
@@ -178,11 +179,11 @@ class ClipControler():
         # calculate bias for each video
         self._video_audio_bias = [None] * len(self._video_path_list)
         for i in range(len(self._video_path_list)):
-            
+
             # calculate bias time
             self._video_audio_bias[i] = self._syn_helper(self._audio_path, self._video_path_list[i][0])
             print("Calculated bias #" + str(i))
-        
+
         # read audio
         temp_audio = AudioSegment.from_mp3(self._audio_path)
 
@@ -190,7 +191,7 @@ class ClipControler():
 
         # obtain the maximum of bias as baseline
         max_bias = max(self._video_audio_bias)
-        
+
         # max bias > 0 means there is a video lower than the audio
         if max_bias > 0:
 
@@ -205,7 +206,7 @@ class ClipControler():
                 for j in range(temp_bias_frame_count):
                     _ = self._video_track_list[i].next_frame()
                     print(j)
-                
+
                 print("Remainder length #" + str(i), self._video_track_list[i].get_remainder_length())
 
             # synchronize audio
@@ -214,7 +215,7 @@ class ClipControler():
 
         # max bias < 0 means all videos are faster than the audio
         else:
-            
+
             # synchronize all videos
             for i in range(len(self._video_track_list)):
 
@@ -227,7 +228,7 @@ class ClipControler():
                     _ = self._video_track_list[i].next_frame()
                     print(j)
             temp_audio_length = int(len(temp_audio) // 1000)
-        
+
 
         ########### to synchronize audio and set overall remiander length ##########
 
@@ -235,18 +236,19 @@ class ClipControler():
         if self._video_track_list[0].get_remainder_length() // self._fps < temp_audio_length:
             print('\n\n\n',temp_audio_length,'!!!!!!!\n\n\n!!!!!!!!!!!!!!!!!!')
             # length of audio > length of video
-            self.__process_bar.set('_overall_view_length', self._video_track_list[0].get_remainder_length())
+            self._total = self._video_track_list[0].get_remainder_length()
             self._overall_view_remainder_length = self._video_track_list[0].get_remainder_length()
-            self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
+            remainder = self._overall_view_remainder_length
+            self._queue.put(self.compute_progress(remainder, self._total))
             temp_audio = temp_audio[:int(self._overall_view_remainder_length * 1000 // self._fps)]
 
         else:
             # length of audio < length of video
             print('\n\n\n',temp_audio_length,'!!!!!!!!!!!!!!!!!!!!!!!!!')
             self._overall_view_remainder_length = temp_audio_length * self._fps
-            self.__process_bar.set('_overall_view_length', self._overall_view_remainder_length)
-            self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
-        
+            remainder = self._overall_view_remainder_length
+            self._queue.put(remainder, self._total)
+
         # output temp audio
         print(len(temp_audio)/1000)
         self._temp_audio_path = "./temp/" + str(self._task_name) + ".mp3"
@@ -278,8 +280,7 @@ class ClipControler():
             # read next frames of all video track
             temp_frames = self._read_next_frame()
             self._overall_view_remainder_length -= 1
-            self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
-            print(self._overall_view_remainder_length)
+            self._queue.put(self.compute_progress(self._overall_view_remainder_length, self._total))
 
             # overall view video is used up
             if temp_frames[0] is None:
@@ -287,7 +288,7 @@ class ClipControler():
             else:
                 # output frame of overall view
                 self._temp_video_writer.write(temp_frames[0])
-        
+
         print("Finish head video output.")
 
         return 0
@@ -310,17 +311,17 @@ class ClipControler():
 
         # tail_duraion: int, length of tail overall view video.
         tail_duration = self._config["tail_duration"]
-        
+
         # obtain minimum and maximum of each video track
         min_output_duration = []
         max_output_duration = []
         for i in range(len(self._video_track_list)):
             min_output_duration.append(self._config["min_output_duration_" + str(i)])
             max_output_duration.append(self._config["max_output_duration_" + str(i)])
-        
+
 
         ########## main loop to compose each video track ##########
-        
+
         # last and current track is overall view track
         last_track_number = 0
         current_track_number = 0
@@ -365,7 +366,7 @@ class ClipControler():
                     # check length is enough for output AND would not influence tail output
                     if temp_output_duration <= self._video_track_list[number].get_remainder_length() and \
                         temp_output_duration <= self._overall_view_remainder_length - tail_duration * self._fps:
-                        
+
                         # select this number as current output track
                         current_track_number = number
                         break
@@ -378,15 +379,14 @@ class ClipControler():
             # output track
             temp_output_point = temp_output_duration
             while temp_output_point > 0:
-                
+
                 # read next frames of all video track
                 temp_frames = self._read_next_frame()
                 self._overall_view_remainder_length -= 1
-                self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
+                self._queue.put(self.compute_progress(self._overall_view_remainder_length, self._total))
                 temp_output_point -= 1
                 print(temp_output_point, temp_output_duration)
                 print(current_track_number)
-                print(self._overall_view_remainder_length)
 
                 # overall view video is used up
                 if temp_frames[current_track_number] is None:
@@ -394,7 +394,7 @@ class ClipControler():
                 else:
                     # output frame of overall view
                     self._temp_video_writer.write(temp_frames[current_track_number])
-                
+
                 if current_track_number != 0 and self._video_track_list[current_track_number].get_first_state_list() == False:
                 # 如果下一帧为 False 状态，切换镜头
                     temp_output_point = 0
@@ -406,7 +406,7 @@ class ClipControler():
 
         """
         Output remainder frames of overall view.
-        
+
         0: success.
         1: overall view video is used up.
         """
@@ -414,21 +414,20 @@ class ClipControler():
         # display stage
         print("\n-----------------------------  Stage 4  ---------------------------------")
         print("-------------------------------------------------------------------------\n")
-        
+
         # overall view is used up
         if self._overall_view_remainder_length <= 0:
             return 1
 
         while self._overall_view_remainder_length > 0:
             self._overall_view_remainder_length -= 1
-            self.__process_bar.set('_overall_view_remainder_length', self._overall_view_remainder_length)
-            print(self._overall_view_remainder_length)
+            self._queue.put(self.compute_progress(self._overall_view_remainder_length, self._total))
             self._temp_video_writer.write(self._video_track_list[0].next_frame())
 
         return 0
-        
+
     def stage5_compose_temp_video_and_audio(self):
-        
+
         """
         Compose temp video and audio.
 
@@ -440,7 +439,7 @@ class ClipControler():
         # display stage
         print("\n-----------------------------  Stage 5  ---------------------------------")
         print("-------------------------------------------------------------------------\n")
-        
+
         # release video writer
         self._temp_video_writer.release()
 
@@ -480,7 +479,8 @@ class ClipControler():
             except Exception as e:
                 return 1
 
-
+    def compute_progress(self, remainder, total):
+        return round(1 - (remainder / total), 2)
 
 
 if __name__ == "__main__":

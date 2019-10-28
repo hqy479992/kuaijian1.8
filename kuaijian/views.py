@@ -15,6 +15,8 @@ from clip_utils import ClipControler
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
 
+from multiprocessing import Queue
+
 # Create your views here.
 # 文件内全局变量
 audio_list = []
@@ -48,7 +50,7 @@ executor = Executor()
 # 界面
 def index_pagehtml(request):
 	return render(request,'index_page.html')
-    
+
 def index_html(request):
     return render(request, 'index.html')
 
@@ -254,9 +256,9 @@ def settingsvalue(request):
         obj = json.loads(request.body.decode())
         task_name = obj['task_name']
         conf = obj['config']
-        process_bar = ProcessBar()
+        queue = Queue()
         audio_path = ExtractAudioTrack(task_name, audio_list) if len(audio_list) > 1 else audio_list[0]
-        executor.submit(task_name, process_bar, exe_clip, task_name, process_bar, conf, video_list.copy(), audio_path)
+        executor.submit(task_name, queue, exe_clip, task_name, queue, conf, video_list.copy(), audio_path)
         return HttpResponse(json.dumps(task_name))
     except:
         return HttpResponse('error')
@@ -281,7 +283,6 @@ def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
 @ensure_csrf_cookie
 def progress(request):
     js_obj = json.loads(request.body.decode())
-    print(js_obj)
     task_name = js_obj['task_name']
     try:
         rate = executor.get_process(task_name)
@@ -289,7 +290,8 @@ def progress(request):
             'task_name': task_name,
             'progress_rate': rate}
         return HttpResponse(json.dumps(prog))
-    except:
+    except Exception as e:
+        print(e)
         prog = {
             'task_name': task_name,
             'progress_rate': 0.01
