@@ -10,12 +10,10 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
-'''
 import discriminator
 from clip_utils import ClipControler
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
-'''
 
 # Create your views here.
 # 文件内全局变量
