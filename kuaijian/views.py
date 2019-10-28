@@ -3,7 +3,6 @@ import json
 import os
 import shutil
 from kuaijian.util.executor import Executor
-from kuaijian.util.process_bar import ProcessBar
 
 from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import render

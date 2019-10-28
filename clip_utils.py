@@ -5,7 +5,6 @@ import os
 import random
 from pydub import AudioSegment
 from soundxHandler import SoundxHandler
-from kuaijian.util.process_bar import ProcessBar
 
 
 

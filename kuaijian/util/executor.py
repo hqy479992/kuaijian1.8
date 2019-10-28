@@ -25,6 +25,5 @@ class Executor:
     def get_all_tasks(self):
         return list(self._tasks.keys())
 
-
     def get_process(self, task_name):
         return self._queues[task_name].get()
