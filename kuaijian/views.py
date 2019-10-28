@@ -10,15 +10,18 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
+'''
 import discriminator
 from clip_utils import ClipControler
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
+'''
 
 # Create your views here.
 # 文件内全局变量
 audio_list = []
 video_list = []
+audio_in_videolist=0
 config = {
     'window_size_0': 0,
     'window_size_1': 150,  # 后面也都默认150
@@ -133,23 +136,25 @@ def getdirsbyupload(request):
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
 def synfolderlist(request):
+    global audio_list,video_list,audio_in_videolist
     obj = json.loads(request.body.decode())
     audio_list.clear()
     video_list.clear()
     try:
-        if os.path.splitext(obj['audioFolder'])[1] != '':
+        if os.path.splitext(obj['audioFolder'])[1] != '': #如果不是文件夹，而是单独的一个音频文件
             audio_list.append(obj['audioFolder'])
             obj['videoAudiolist'].remove(obj['audioFolder'])
         else:
             # 如果有单独的音频文件夹
-            if obj['audioByVideo'] == False:
+            if obj['audioByVideo'] == False: #如果是有单独的音频文件夹，而不是视频作音频
                 # 音频列表
                 filelistindir(os.path.join('static/uploadfiles', obj['audioFolder']), audio_list, audio_suffix)
                 obj['videoAudiolist'].remove(obj['audioFolder'])
             else:
                 # 音频列表
-                filelistindir(os.path.join('static/uploadfiles', obj['audioFolder']), audio_list, video_suffix)
-                audio_list.sort()
+                #filelistindir(os.path.join('static/uploadfiles', obj['audioFolder']), audio_list, video_suffix)
+                #audio_list.sort()
+                audio_in_videolist=obj['videoAudiolist'].index(obj['audioFolder']) #此时audio_list是空的
         # 视频列表
         for i in range(0, len(obj['videoAudiolist'])):
             tem_video_list = []
@@ -158,8 +163,8 @@ def synfolderlist(request):
             video_list.append(tem_video_list)
         return HttpResponse('success')
     except Exception as e:
-        raise e
         return HttpResponse('error')
+        raise e
 
 
 @require_http_methods(['POST'])

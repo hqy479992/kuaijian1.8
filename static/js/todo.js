@@ -258,7 +258,6 @@ $('#startsettings').click(function(){
 			'audioFolder':audioFolder,
 			'audioByVideo':false
 		}
-		console.log(JSON.stringify(obj))
 		$.ajax({
 			url:'/synfolderlist',
 			type:'POST',
