@@ -6,11 +6,13 @@ class Executor:
     def __init__(self):
         self._tasks = {}
         self._queues = {}
+        self._rate_cache = {}
 
     def submit(self, task_name, queue, func, *args):
         p = Process(target=func, args=args)
         self._tasks[task_name] = p
         self._queues[task_name] = queue
+        self._rate_cache[task_name] = 0.01
         p.start()
 
     def stop(self, task_name):
@@ -27,6 +29,8 @@ class Executor:
 
     def get_process(self, task_name):
         try:
-            return self._queues[task_name].get(timeout=1)
+            rate = self._queues[task_name].get(timeout=1)
+            self._rate_cache[task_name] = rate
+            return rate
         except:
-            return 0.01
+            return self._rate_cache[task_name]

@@ -237,16 +237,14 @@ class ClipControler():
             # length of audio > length of video
             self._total = self._video_track_list[0].get_remainder_length()
             self._overall_view_remainder_length = self._video_track_list[0].get_remainder_length()
-            remainder = self._overall_view_remainder_length
-            self._queue.put(self.compute_progress(remainder, self._total))
+            self._write_rate()
             temp_audio = temp_audio[:int(self._overall_view_remainder_length * 1000 // self._fps)]
 
         else:
             # length of audio < length of video
             print('\n\n\n',temp_audio_length,'!!!!!!!!!!!!!!!!!!!!!!!!!')
             self._overall_view_remainder_length = temp_audio_length * self._fps
-            remainder = self._overall_view_remainder_length
-            self._queue.put(remainder, self._total)
+            self._write_rate()
 
         # output temp audio
         print(len(temp_audio)/1000)
@@ -279,7 +277,7 @@ class ClipControler():
             # read next frames of all video track
             temp_frames = self._read_next_frame()
             self._overall_view_remainder_length -= 1
-            self._queue.put(self.compute_progress(self._overall_view_remainder_length, self._total))
+            self._write_rate()
 
             # overall view video is used up
             if temp_frames[0] is None:
@@ -382,7 +380,7 @@ class ClipControler():
                 # read next frames of all video track
                 temp_frames = self._read_next_frame()
                 self._overall_view_remainder_length -= 1
-                self._queue.put(self.compute_progress(self._overall_view_remainder_length, self._total))
+                self._write_rate()
                 temp_output_point -= 1
                 print(temp_output_point, temp_output_duration)
                 print(current_track_number)
@@ -420,7 +418,7 @@ class ClipControler():
 
         while self._overall_view_remainder_length > 0:
             self._overall_view_remainder_length -= 1
-            self._queue.put(self.compute_progress(self._overall_view_remainder_length, self._total))
+            self._write_rate()
             self._temp_video_writer.write(self._video_track_list[0].next_frame())
 
         return 0
@@ -478,8 +476,16 @@ class ClipControler():
             except Exception as e:
                 return 1
 
-    def compute_progress(self, remainder, total):
+    def _compute_progress(self, remainder, total):
         return round(1 - (remainder / total), 2)
+
+    def _write_rate(self):
+        remainder = self._overall_view_remainder_length
+        total = self._total
+        try:
+            self._queue.put_nowait(self._compute_progress(remainder, total))
+        except:
+            pass
 
 
 if __name__ == "__main__":
