@@ -58,7 +58,8 @@ class ClipControler():
         self._overall_view_remainder_length = None
         self._syn_handler = syn_handler
         self._queue = queue
-        self._total = 0.0
+        self._total = None
+        self._pre_rate = 0.01
 
         # initialize video track
         for i in range(len(video_path_list)):
@@ -75,6 +76,9 @@ class ClipControler():
                     raise Exception("Different FPS!")
                 if self._resolution != temp_video_queue.get_resolution():
                     raise Exception("Different resolution!")
+
+            self._write_rate(self._pre_rate)
+            self._pre_rate += 0.01
 
             # build video track for each channel
             temp_video_track = video_utils.VideoTrack(temp_video_queue, discriminator, self._config["window_size_" + str(i)])
@@ -206,6 +210,8 @@ class ClipControler():
                     _ = self._video_track_list[i].next_frame()
                     print(j)
 
+                self._write_rate(self._pre_rate)
+                self._pre_rate += 0.01
                 print("Remainder length #" + str(i), self._video_track_list[i].get_remainder_length())
 
             # synchronize audio
@@ -226,6 +232,10 @@ class ClipControler():
                 for j in range(temp_bias_frame_count):
                     _ = self._video_track_list[i].next_frame()
                     print(j)
+
+            self._write_rate(self._pre_rate)
+            self._pre_rate += 0.01
+
             temp_audio_length = int(len(temp_audio) // 1000)
 
 
@@ -237,14 +247,13 @@ class ClipControler():
             # length of audio > length of video
             self._total = self._video_track_list[0].get_remainder_length()
             self._overall_view_remainder_length = self._video_track_list[0].get_remainder_length()
-            self._write_rate()
             temp_audio = temp_audio[:int(self._overall_view_remainder_length * 1000 // self._fps)]
 
         else:
             # length of audio < length of video
             print('\n\n\n',temp_audio_length,'!!!!!!!!!!!!!!!!!!!!!!!!!')
             self._overall_view_remainder_length = temp_audio_length * self._fps
-            self._write_rate()
+            self._total = temp_audio_length * self._fps
 
         # output temp audio
         print(len(temp_audio)/1000)
@@ -277,7 +286,7 @@ class ClipControler():
             # read next frames of all video track
             temp_frames = self._read_next_frame()
             self._overall_view_remainder_length -= 1
-            self._write_rate()
+            self._write_rate(self._update_rate())
 
             # overall view video is used up
             if temp_frames[0] is None:
@@ -347,7 +356,7 @@ class ClipControler():
                 satisfying_number_list = []
                 for number in range(len(self._video_track_list)):
                     print(self._video_track_list[number].get_current_state())
-                    if self._video_track_list[number].get_current_state() == True and number != last_track_number:
+                    if self._video_track_list[number].get_current_state() and number != last_track_number:
                         satisfying_number_list.append(number)
 
                 # shuffle satisfying numbers
@@ -380,7 +389,7 @@ class ClipControler():
                 # read next frames of all video track
                 temp_frames = self._read_next_frame()
                 self._overall_view_remainder_length -= 1
-                self._write_rate()
+                self._write_rate(self._update_rate())
                 temp_output_point -= 1
                 print(temp_output_point, temp_output_duration)
                 print(current_track_number)
@@ -418,7 +427,7 @@ class ClipControler():
 
         while self._overall_view_remainder_length > 0:
             self._overall_view_remainder_length -= 1
-            self._write_rate()
+            self._write_rate(self._update_rate())
             self._temp_video_writer.write(self._video_track_list[0].next_frame())
 
         return 0
@@ -449,6 +458,7 @@ class ClipControler():
             return self._compose_video_audio(self._temp_video_path, self._audio_path)
         else:
             return self._compose_video_audio(self._temp_video_path, self._temp_audio_path)
+        self._write_rate(1)
 
     def __del__(self):
 
@@ -476,157 +486,13 @@ class ClipControler():
             except Exception as e:
                 return 1
 
-    def _compute_progress(self, remainder, total):
-        return round(1 - (remainder / total), 2)
+    def _update_rate(self):
+        rate = self._pre_rate + (1 - self._pre_rate) * (1 - self._overall_view_remainder_length / self._total)
+        return rate
 
-    def _write_rate(self):
-        remainder = self._overall_view_remainder_length
-        total = self._total
+    def _write_rate(self, rate):
         try:
-            self._queue.put_nowait(self._compute_progress(remainder, total))
+            self._queue.put_nowait(rate)
+            print('进度更新为 : {}'.format(rate))
         except:
             pass
-
-
-if __name__ == "__main__":
-    # video_path = [["/media/wsn/N/sample_video/whole_short/test_whole_1.MP4",
-    #             "/media/wsn/N/sample_video/whole_short/test_whole_2.MP4"],
-    #             ["/media/wsn/N/sample_video/main_short/test_main_1.MP4",
-    #             "/media/wsn/N/sample_video/main_short/test_main_2.MP4",
-    #             "/media/wsn/N/sample_video/main_short/test_main_3.MP4"]]
-    # audio_path = "/media/wsn/N/sample_video/voice_short/main.wav"
-    # config = {
-    #     "window_size_0" : 0,
-    #     "window_size_1" : 125,
-    #     "min_output_duration_0" : 10,
-    #     "max_output_duration_0" : 15,
-    #     "min_output_duration_1" : 10,
-    #     "max_output_duration_1" : 20,
-    #     "head_duration" : 10,
-    #     "tail_duration" : 10,
-    # }
-    # video_path = [["/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0247_01/C27_0247_01.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0247_02/C27_0247_02.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0247_03/C27_0247_03.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0247_04/C27_0247_04.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0247_05/C27_0247_05.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0247_06/C27_0247_06.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0247_07/C27_0247_07.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0248_01/C27_0248_01.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0248_02/C27_0248_02.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0248_03/C27_0248_03.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0248_04/C27_0248_04.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0248_05/C27_0248_05.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0248_06/C27_0248_06.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0248_07/C27_0248_07.MP4",
-    #             "/media/wsn/TOSHIBAEXT/whole/BPAV/CLPR/C27_0248_08/C27_0248_08.MP4"],
-                
-    #             ["/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0364_01/948_0364_01.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0364_02/948_0364_02.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0364_03/948_0364_03.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0364_04/948_0364_04.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0364_05/948_0364_05.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0364_06/948_0364_06.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0364_07/948_0364_07.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0365_01/948_0365_01.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0365_02/948_0365_02.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0365_03/948_0365_03.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0365_04/948_0365_04.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0366_01/948_0366_01.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0366_02/948_0366_02.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0366_03/948_0366_03.MP4",
-    #             "/media/wsn/TOSHIBAEXT/main/BPAV/CLPR/948_0366_04/948_0366_04.MP4"],
-               
-    #             ["/media/wsn/TOSHIBAEXT/3/CLPR/764_2489_01/764_2489_01.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2489_02/764_2489_02.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2489_03/764_2489_03.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2490_01/764_2490_01.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2490_02/764_2490_02.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2491_01/764_2491_01.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2491_02/764_2491_02.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2491_03/764_2491_03.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2491_04/764_2491_04.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2491_05/764_2491_05.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2491_06/764_2491_06.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2491_07/764_2491_07.MP4",
-    #             "/media/wsn/TOSHIBAEXT/3/CLPR/764_2491_08/764_2491_08.MP4"]
-    #             ]
-    video_path = [['/media/wsn/N/zhenai/whole/C27_0247_01.MP4',
-                   '/media/wsn/N/zhenai/whole/C27_0247_02.MP4'],
-                  ['/media/wsn/N/zhenai/main/948_0364_01.MP4',
-                   '/media/wsn/N/zhenai/main/948_0364_02.MP4'],
-                  ['/media/wsn/N/zhenai/3/764_2489_01.MP4',
-                  '/media/wsn/N/zhenai/3/764_2489_02.MP4']]
-    audio_path = "/home/wsn/Desktop/MONO-000.wav"
-
-    video_path = [['/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/whole/BPAV/CLPR/639_0492_01/639_0492_01.MP4',
-                   '/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/whole/BPAV/CLPR/639_0492_02/639_0492_02.MP4',
-                   '/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/whole/BPAV/CLPR/639_0492_03/639_0492_03.MP4'],
-                   ['/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/main/BPAV/CLPR/200_1019_01/200_1019_01.MP4',
-                   '/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/main/BPAV/CLPR/200_1019_02/200_1019_02.MP4',
-                   '/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/main/BPAV/CLPR/200_1019_03/200_1019_03.MP4'],
-                   ['/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/3/BPAV/CLPR/655_1079_01/655_1079_01.MP4',
-                   '/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/3/BPAV/CLPR/655_1079_02/655_1079_02.MP4',
-                   '/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/3/BPAV/CLPR/655_1079_03/655_1079_03.MP4']]
-    audio_path = "/media/wsn/TOSHIBAEXT/2019.5.30youeryuan/voice/STEREO/FOLDER01/MONO-000.wav"
-    config = {
-        "window_size_0" : 0,
-        "window_size_1" : 125,
-        "window_size_2" : 125,
-        "min_output_duration_0" : 5,
-        "max_output_duration_0" : 10,
-        "min_output_duration_1" : 10,
-        "max_output_duration_1" : 20,
-        "min_output_duration_2" : 5,
-        "max_output_duration_2" : 10,
-        "head_duration" : 10,
-        "tail_duration" : 10,
-    }
-
-    # video_path = [['/media/wsn/N/kuaijian1.5/static/uploadfiles/whole_short/test_whole_1.MP4',
-    #                '/media/wsn/N/kuaijian1.5/static/uploadfiles/whole_short/test_whole_2.MP4'],
-    #                ['/media/wsn/N/kuaijian1.5/static/uploadfiles/main_short/test_main_1.MP4',
-    #                '/media/wsn/N/kuaijian1.5/static/uploadfiles/main_short/test_main_2.MP4',
-    #                '/media/wsn/N/kuaijian1.5/static/uploadfiles/main_short/test_main_3.MP4']]
-    # audio_path = '/media/wsn/N/kuaijian1.5/static/uploadfiles/voice_short/main.wav'
-
-    # video_path = [['/media/wsn/TOSHIBAEXT/2019.5.17huaxiweidao/whole/BPAV/CLPR/100_0919_01/100_0919_01.MP4',
-    #                '/media/wsn/TOSHIBAEXT/2019.5.17huaxiweidao/whole/BPAV/CLPR/100_0919_02/100_0919_02.MP4'],
-    #                ['/media/wsn/TOSHIBAEXT/2019.5.17huaxiweidao/main/BPAV/CLPR/200_0874_01/200_0874_01.MP4',
-    #                '/media/wsn/TOSHIBAEXT/2019.5.17huaxiweidao/main/BPAV/CLPR/200_0874_02/200_0874_02.MP4']]
-    # audio_path = '/media/wsn/TOSHIBAEXT/2019.5.17huaxiweidao/voice/STEREO/FOLDER01/MONO-000.wav'
-
-    # config = {
-    #     "window_size_0" : 0,
-    #     "window_size_1" : 125,
-    #     "min_output_duration_0" : 5,
-    #     "max_output_duration_0" : 10,
-    #     "min_output_duration_1" : 10,
-    #     "max_output_duration_1" : 20,
-    #     "head_duration" : 10,
-    #     "tail_duration" : 10,
-    # }
-    # video_path = [['/media/wsn/N/yancao/whole/whole_1_whole.MP4',
-    #                '/media/wsn/N/yancao/whole/whole_2.MP4'],
-    #                ['/media/wsn/N/yancao/main/main_main.MP4']]
-    # audio_path = '/media/wsn/N/yancao/voice/MONO-000.wav'
-    # config = {
-    #     "window_size_0" : 0,
-    #     "window_size_1" : 125,
-    #     "min_output_duration_0" : 10,
-    #     "max_output_duration_0" : 15,
-    #     "min_output_duration_1" : 10,
-    #     "max_output_duration_1" : 20,
-    #     "head_duration" : 10,
-    #     "tail_duration" : 10,
-    # }
-
-    syn_handler = SoundxHandler()
-    dis = discriminator.YOLOv3_discriminator()
-    cc = ClipControler("123456", video_path, audio_path, "./temp/test_output.mp4", syn_handler, dis, config)
-    print(cc.stage1_synchonization())
-    print(cc.stage2_overall_view_designated_duration())
-    print(cc.stage3_compose_videos_method_1())
-    print(cc.stage4_output_overall_view_remainder())
-    print(cc.stage5_compose_temp_video_and_audio())
-    del cc
