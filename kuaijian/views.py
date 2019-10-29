@@ -273,7 +273,7 @@ def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
         cc.run()
         del cc
     except Exception as e:
-        raise  e
+        raise e
 
 
 
@@ -283,19 +283,11 @@ def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
 def progress(request):
     js_obj = json.loads(request.body.decode())
     task_name = js_obj['task_name']
-    try:
-        rate = executor.get_process(task_name)
-        prog = {
-            'task_name': task_name,
-            'progress_rate': rate}
-        return HttpResponse(json.dumps(prog))
-    except Exception as e:
-        print(e)
-        prog = {
-            'task_name': task_name,
-            'progress_rate': 0.01
-        }
-        return HttpResponse(json.dumps(prog))
+    rate = executor.get_process(task_name)
+    prog = {
+        'task_name': task_name,
+        'progress_rate': rate}
+    return HttpResponse(json.dumps(prog))
 
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
