@@ -281,13 +281,9 @@ def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
 def progress(request):
-    js_obj = json.loads(request.body.decode())
-    task_name = js_obj['task_name']
-    rate = executor.get_process(task_name)
-    prog = {
-        'task_name': task_name,
-        'progress_rate': rate}
-    return HttpResponse(json.dumps(prog))
+    tasks = executor.get_all_tasks()
+    rates = [{'task_name': task, 'progress_rate': executor.get_process(task)} for task in tasks]
+    return HttpResponse(json.dumps(rates))
 
 @require_http_methods(['POST'])
 @ensure_csrf_cookie
