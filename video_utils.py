@@ -260,13 +260,9 @@ class VideoTrack():
 
                 # discriminate state of the frame
                 temp_state = self._discriminator.discriminate(self._previous_image, temp_frame)
-                print(self._video_queue)
-                print(temp_state)
-                print(self._window_state_list)
                 self._update_window_state_list(temp_state)
                 # self._window_state_list.pop(0)
                 # self._window_state_list.append(temp_state)
-                print(self._window_state_list)
                 # calculate current state
                 self._current_state = True
                 for temp_state in self._window_state_list:

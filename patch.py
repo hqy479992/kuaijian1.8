@@ -10,8 +10,8 @@ def ExtractAudioTrack(task_name, audio_list):
             new_voice = temp_voice
         else:  # 之后的音轨
             new_voice = new_voice + temp_voice
-    new_voice.export('./static/uploadfiles/' + task_name + '.mp3' , format = "mp3")  # 保存提取后的音轨-音轨地址
-    return './static/uploadfiles/' + task_name + '.mp3'  # 返回音轨地址-音轨地址
+    new_voice.export('./static/uploadfiles/' + task_name + '.wav' , format = "wav")  # 保存提取后的音轨-音轨地址
+    return './static/uploadfiles/' + task_name + '.wav'  # 返回音轨地址-音轨地址
 
 # def ExtractVideoMaterial(a):
 # # 函数作用：提取指定通道的视频素材

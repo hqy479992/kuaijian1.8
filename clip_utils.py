@@ -248,8 +248,8 @@ class ClipControler():
 
         # output temp audio
         print(len(temp_audio)/1000)
-        self._temp_audio_path = "./temp/" + str(self._task_name) + ".mp3"
-        temp_audio.export(self._temp_audio_path, "mp3")
+        self._temp_audio_path = "./temp/" + str(self._task_name) + ".wav"
+        temp_audio.export(self._temp_audio_path, "wav")
 
         print("Finish audio synchronization.")
 

@@ -16,7 +16,7 @@ client = Soundx.Client(protocol)
 
 transport.open()
 
-refAudio = "/var/data/main.mp3"
+refAudio = "/var/data/main.wav"
 videoDir = "/var/data/"
 resultFilePath = "/var/data/result.txt"
 
