@@ -1,6 +1,7 @@
 import cv2
 import video_utils
 import discriminator
+from discriminator import FuzzyDetection, ShakeDetection
 import os
 import random
 from pydub import AudioSegment
@@ -35,7 +36,7 @@ class ClipControler():
     _temp_audio_path = None
     _syn_handler = None
 
-    def __init__(self, task_name, queue, video_path_list, audio_path, output_file_path, syn_handler, discriminator, config):
+    def __init__(self, task_name, queue, video_path_list, audio_path, output_file_path, syn_handler, discriminator, fuzzy_detection, shake_detection, config):
 
         """
         Input:
@@ -51,6 +52,8 @@ class ClipControler():
         self._audio_path = audio_path
         self._config = config
         self._discriminator = discriminator
+        self._fuzzy_detection = fuzzy_detection
+        self._shake_detection = shake_detection
         self._temp_video_writer = None
         self._output_file_path = output_file_path
         self._fps = None
@@ -81,7 +84,7 @@ class ClipControler():
             self._pre_rate += 0.01
 
             # build video track for each channel
-            temp_video_track = video_utils.VideoTrack(temp_video_queue, discriminator, self._config["window_size_" + str(i)])
+            temp_video_track = video_utils.VideoTrack(temp_video_queue, discriminator, fuzzy_detection, shake_detection, self._config["window_size_" + str(i)])
             self._video_track_list.append(temp_video_track)
 
             print("Finish video track initialization #", str(i))
