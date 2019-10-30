@@ -1,11 +1,11 @@
 from pydub import AudioSegment
 import cv2
 
-def ExtractAudioTrack(task_name, audio_list):
+def ExtractAudioTrack(task_name, video_list, audio_in_videolist):
 # 函数作用：提取指定通道的音轨
     new_voice = None  # 新的音轨
-    for i in range(0, len(audio_list)):  # 遍历指定通道的所有视频
-        temp_voice = AudioSegment.from_file(audio_list[i])  # 获取视频的音轨
+    for i in range(0, len(video_list[audio_in_videolist])):  # 遍历指定通道的所有视频
+        temp_voice = AudioSegment.from_file(video_list[audio_in_videolist][i])  # 获取视频的音轨
         if i == 0:  # 第一段音轨
             new_voice = temp_voice
         else:  # 之后的音轨
