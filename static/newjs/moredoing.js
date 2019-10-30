@@ -1,30 +1,18 @@
 //全局变量
 var task_list = [];
+var bari;
 
 window.onload = function () {
-	var obj = {
-		'getAllTasks': 'get_all_task'
-	}
-	$.ajax({
-		url: '/get_all_task',
-		type: 'POST',
-		data: JSON.stringify(obj),
-		async: true,
-		success: function (data) {
-			console.log(data)
-			if (data == 'error') {
-				//error
-			}
-			else {
-				task_list = JSON.parse(data)
-				moreTask(task_list);
-				setInterval(function () { barMoreTask(task_list) }, 5000)
-			}
-		}
-	})
-	console.log(task_list)
+
+	getProgress()
+    setInterval(function () { moreTask() }, 5000)
 }
-function getProgress(obj) {
+
+function getProgress() {
+	var obj = {
+		'task_name': 'task_name',
+		'progress_rate': 'progress_rate'
+	}
 	$.ajax({
 		url: '/progress',
 		type: 'POST',
@@ -32,74 +20,64 @@ function getProgress(obj) {
 		async: true,
 		success: function (data) {
 			if (data == 'error') {
-				//do nothing
-			}
-			else {
+				//error
+			} else {
 				data = JSON.parse(data)
-				var progreessrate = data['progress_rate'] * 100
-				$('div.progress-bar').css('width', progreessrate + '%')
-				$('div.progress-bar span').text(progreessrate + '%')
+				moreTask(data)
+
 			}
 		}
+
 	})
 }
-function barMoreTask(list) {
-	for (var item of list) {
-		var obj = {
-			'progress': 'progress',
-			'task_name': item
-		}
-		getProgress(obj);
-	}
-}
 
+function moreTask(data){
+    $.each(data, function (i, item) {
+					console.log(item.task_name)
+					console.log(item.progress_rate)
+					$('.bar').append(`
+                             	<div class="row bar-list">
+                                    <div class="col-2">
+                                        <span>${item.task_name}</span>
+                                    </div>
+                                    <div class="progress  col-9 mt-2 " style = "padding:0px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" id="bar${i}" role="progressbar" aria-valuemin="0" aria-valuemax="100" style=""><span></span></div>
+                                    </div>
+                                    <div class="col-1">
+                                        <span class="fa fa-times-circle task"  onclick="closeBar(event,\'${item.task_name}\')"></span>
+                                    </div>
+			                    </div>`)
 
-//多进程
-function moreTask(task_list) {
-	if(task_list.length>0){
-		for (var item of task_list) {
-			$('.bar').append(`
-			<div class="row bar-list">
-				<div class="col-2">
-					<span>${item}</span>
-				</div>
-				<div class="progress  col-9 mt-2 " style = "padding:0px;">
-					<div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style=""><span></span></div>
-				</div>
-				<div class="col-1">
-					<span class="fa fa-times-circle task"  onclick="closeBar(event,\'${item}\')"></span>
-				</div>
-			   </div>`)
-			var obj = {
-				'progress': 'progress',
-				'task_name': item
-			}
-			getProgress(obj);
-		}
-	}
+								var rate = item.progress_rate * 100
+								rate = rate.toFixed(2)
+								bari = 'bar'+i.toString()
+								$('div#'+bari).css('width', rate + '%')
+								$('div#'+bari+' span').text(rate + '%')
+
+				})
 }
 
 //关闭
-function closeBar(e,name) {
-		name=name||"";
-		$(e.target).parent().parent().remove();
-		task_list.splice(task_list.indexOf(name), 1);
-		var obj={
-		    'task_name':name
+function closeBar(e, name) {
+	// name = name || "";
+	$(e.target).parent().parent().remove();
+	// task_list.splice(task_list.indexOf(name), 1);
+	var obj = {
+		'task_name': name
+	}
+	$.ajax({
+		url: '/stop_task',
+		type: 'POST',
+		data: JSON.stringify(obj),
+		async: true,
+		success: function (data) {
+			if (data == 'error') {
+				//    console.log("交互失败")
+			}
+			else {
+				console.log(data)
+			}
 		}
-		$.ajax({
-		    url:'/stop_task',
-		    type:'POST',
-		    data:JSON.stringify(obj),
-		    async:true,
-		    success:function(data){
-	           if(data=='error'){
-	            //    console.log("交互失败")
-	           }
-	           else{
-	               console.log(data)
-	           }
-		    }
-		})
+	})
 }
 
