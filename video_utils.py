@@ -182,7 +182,7 @@ class VideoTrack():
     _window_none_count = None
     _previous_image = None
 
-    def __init__(self, video_queue, discriminator, window_size = 125):
+    def __init__(self, video_queue, discriminator, fuzzy_detection, shake_detection, window_size = 125):
 
         """
         Video track contains a VideoQueue object, which is utilized to encapsulate a track.
@@ -196,6 +196,8 @@ class VideoTrack():
 
         self._video_queue = video_queue
         self._discriminator = discriminator
+        self._fuzzy_detection = fuzzy_detection
+        self._shake_detection = shake_detection
         self._window_size = window_size
         self._window_none_count = 0
         self._window_image_list = []
@@ -223,7 +225,10 @@ class VideoTrack():
                 else:
                     self._previous_image = temp_frame
                     # judge state of the frame
-                    temp_state = self._discriminator.discriminate(self._previous_image, temp_frame)
+                    temp_state = True
+                    temp_state = temp_state and self._discriminator.discriminate(temp_frame)
+                    temp_state = temp_state and self._fuzzy_detection.fuzzy_detection(temp_frame)
+                    temp_state = temp_state and self._shake_detection.shake_detection(self._previous_image, temp_frame)
                 self._window_state_list.append(temp_state)
 
             # calculate current stself._window_image_list[i]ate
@@ -259,7 +264,10 @@ class VideoTrack():
             if temp_frame is not None:
 
                 # discriminate state of the frame
-                temp_state = self._discriminator.discriminate(self._previous_image, temp_frame)
+                temp_state = True
+                temp_state = temp_state and self._discriminator.discriminate(temp_frame)
+                temp_state = temp_state and self._fuzzy_detection.fuzzy_detection(temp_frame)
+                temp_state = temp_state and self._shake_detection.shake_detection(self._previous_image, temp_frame)
                 self._update_window_state_list(temp_state)
                 # self._window_state_list.pop(0)
                 # self._window_state_list.append(temp_state)
