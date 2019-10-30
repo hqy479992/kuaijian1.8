@@ -10,6 +10,7 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
 import discriminator
+from discriminator import FuzzyDetection, ShakeDetection
 from clip_utils import ClipControler
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
@@ -269,7 +270,7 @@ def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
         syn_handler = SoundxHandler()
         dis = discriminator.YOLOv3_discriminator()
         cc = ClipControler(task_name, process_bar, video_ls, audio_path, "./static/resultfiles/" + task_name + ".mp4", syn_handler,
-                           dis, conf)
+                           dis, FuzzyDetection(), ShakeDetection(), conf)
         cc.run()
         del cc
     except Exception as e:
