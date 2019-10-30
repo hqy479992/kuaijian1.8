@@ -257,7 +257,7 @@ def settingsvalue(request):
         task_name = obj['task_name']
         conf = obj['config']
         queue = Queue()
-        audio_path = ExtractAudioTrack(task_name, audio_list) if len(audio_list) > 1 else audio_list[0]
+        audio_path = ExtractAudioTrack(task_name, video_list, audio_in_videolist) if len(audio_list) == 0 else audio_list[0]
         executor.submit(task_name, queue, exe_clip, task_name, queue, conf, video_list.copy(), audio_path)
         return HttpResponse(json.dumps(task_name))
     except:
