@@ -11,9 +11,7 @@ class YOLOv3_discriminator():
                 classes_file = 'YOLOv3/data/coco_classes.txt',
                 yolo_object_threshold = 0.6,
                 yolo_nms_threshold = 0.5, 
-                confidence = 0.90,
-                fuzzy_score = 50,
-                min_feature_points = 70):
+                confidence = 0.90):
 
         """
         YOLOv3 discriminator utilize YOLOv3 model to detect objects.
@@ -29,12 +27,10 @@ class YOLOv3_discriminator():
         self.yolo_model = YOLO(yolov3_model_path, yolo_object_threshold, yolo_nms_threshold)
         self.confidence = confidence
         self.all_classes = utils.get_classes(classes_file)
-        self.fuzzy_score = fuzzy_score
-        self.min_feature_points = min_feature_points
 
-    def discriminate(self, previous_image, image):
+    def discriminate(self, image):
     # 函数作用：判断当前帧是否可用
-        if self.people_detection(image) and self.fuzzy_detection(image) and self.shake_detection(previous_image, image):
+        if self.people_detection(image):
         # 如果当前帧 检测到人 and 不模糊 and 不抖动
             return True
         else:
@@ -57,6 +53,11 @@ class YOLOv3_discriminator():
             return True
         else:
             return False
+    
+class FuzzyDetection():
+    
+    def __init__(self, fuzzy_score = 50):
+        self.fuzzy_score = fuzzy_score
         
     def fuzzy_detection(self, image):
     # 函数作用：获取图片的 score 以判断是否为虚焦或模糊
@@ -67,7 +68,12 @@ class YOLOv3_discriminator():
             return True
         else:
             return False
-
+        
+class ShakeDetection():
+    
+    def __init__(self, min_feature_points = 70):
+        self.min_feature_points = min_feature_points
+        
     def shake_detection(self, previous_image, image):
     # 函数作用：检测镜头是否发生抖动
         img1 = cv2.cvtColor(previous_image, cv2.COLOR_BGR2GRAY)  # 把前一帧转换成灰度图像
@@ -92,8 +98,7 @@ class YOLOv3_discriminator():
         else:
         # 如果从帧中提取不到特征值（当前图片不好）
             return False
-
+        
 if __name__ == "__main__":
     yolo = YOLOv3_discriminator('YOLOv3/data/yolo.h5', 'YOLOv3/data/coco_classes.txt')
     print(yolo.discriminate(cv2.imread("/home/wsn/Pictures/The_Gongga_Mountain_by_wangjinyu.jpg")))
-    
