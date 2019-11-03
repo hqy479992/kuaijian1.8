@@ -32,12 +32,14 @@ function getProgress() {
 function createList(data) {
 	$.each(data, function (index, item) {
 		$(".bar").append(`
-				<div class="row bar-list bar-list${index}">
-					<div class="col-2">
-						<span>${item.task_name}</span>
+				<div class="row bar-list bar-list${index} pt-3">
+					<div class="col-9">
+						<h3>${item.task_name}</h3>
 					</div>
-					<div class="col-1">
-						<span class="fa fa-times-circle task"  onclick="closeBar(event,\'${item.task_name}\')"></span>
+					<div class="col-3">
+						<button class="btn btn-secondary"  onclick="closeBar(event,\'${item.task_name}\')">
+						    <span class="fa fa-times"></span>取消合成
+						</button>
 					</div>
 				</div>
 			`)
@@ -49,7 +51,8 @@ function createBar(data) {
 	    var rate = item.progress_rate *100
 	    rate  = rate.toFixed(3);
 		$(".bar-list" + index).append(`
-		<div class="progress  col-9 mt-2 " style = "padding:0px;">
+		<br>
+		<div class="progress col-10 mt-2 ml-3 row" style="padding:0">
 		<div class="progress-bar progress-bar-striped progress-bar-animated bg-info"  role="progressbar" aria-valuemin="0" aria-valuemax="100"  style="width: ${rate}%;">
 		    <span>${rate}%</span>
 		</div>
