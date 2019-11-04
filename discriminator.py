@@ -2,7 +2,8 @@ import cv2
 from YOLOv3 import utils
 from YOLOv3.model.yolo_model import YOLO
 
-class YOLOv3_discriminator():
+
+class YOLOv3_discriminator:
 
     yolo_model = None
     confidence = None

@@ -8,8 +8,13 @@ from pydub import AudioSegment
 from soundxHandler import SoundxHandler
 
 
-
 class ClipControler():
+
+    import tensorflow as tf
+
+    config = tf.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = 0.4
+    session = tf.Session(config=config)
 
     """
     The controler of whole clip procedure.
