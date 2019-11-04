@@ -490,12 +490,13 @@ class ClipControler():
                 return 1
 
     def _update_rate(self):
+        print('remainder length = {}'.format(self._overall_view_remainder_length))
         rate = self._pre_rate + (1 - self._pre_rate) * (1 - self._overall_view_remainder_length / self._total)
         return rate
 
     def _write_rate(self, rate):
         try:
-            self._queue.put_nowait(rate)
+            self._queue.append(rate)
             print('进度更新为 : {}'.format(rate))
         except:
             pass

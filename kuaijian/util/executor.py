@@ -21,15 +21,12 @@ class Executor:
         del self._queues[task_name]
         print("successful stopped task {}".format(task_name))
 
-    def get_process(self, task_name):
-        pass
-
     def get_all_tasks(self):
         return list(self._tasks.keys())
 
     def get_process(self, task_name):
         try:
-            rate = self._queues[task_name].get_nowait()
+            rate = self._queues[task_name].pop()
             self._rate_cache[task_name] = rate
             return rate
         except:
