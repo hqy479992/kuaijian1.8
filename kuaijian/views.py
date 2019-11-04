@@ -9,9 +9,6 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
-import discriminator
-from discriminator import FuzzyDetection, ShakeDetection
-from clip_utils import ClipControler
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
 
@@ -265,6 +262,14 @@ def settingsvalue(request):
 
 
 def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
+    import discriminator
+    from discriminator import FuzzyDetection, ShakeDetection
+    from clip_utils import ClipControler
+    import tensorflow as tf
+
+    config = tf.compat.v1.ConfigProto()
+    config.gpu_options.per_process_gpu_memory_fraction = 0.4
+    session = tf.Session(config=config)
     try:
         # 开始合成
         syn_handler = SoundxHandler()

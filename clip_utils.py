@@ -10,11 +10,7 @@ from soundxHandler import SoundxHandler
 
 class ClipControler():
 
-    import tensorflow as tf
 
-    config = tf.ConfigProto()
-    config.gpu_options.per_process_gpu_memory_fraction = 0.4
-    session = tf.Session(config=config)
 
     """
     The controler of whole clip procedure.
@@ -501,7 +497,7 @@ class ClipControler():
 
     def _write_rate(self, rate):
         try:
-            self._queue.append(rate)
+            self._queue.put_nowait(rate)
             print('进度更新为 : {}'.format(rate))
         except:
             pass
