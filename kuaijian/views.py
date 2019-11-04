@@ -12,7 +12,7 @@ from django.views.decorators.http import require_http_methods
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
 
-from collections import deque
+from multiprocessing import Queue
 
 # Create your views here.
 # 文件内全局变量
@@ -253,7 +253,7 @@ def settingsvalue(request):
         obj = json.loads(request.body.decode())
         task_name = obj['task_name']
         conf = obj['config']
-        queue = deque()
+        queue = Queue()
         audio_path = ExtractAudioTrack(task_name, video_list, audio_in_videolist) if len(audio_list) == 0 else audio_list[0]
         executor.submit(task_name, queue, exe_clip, task_name, queue, conf, video_list.copy(), audio_path)
         return HttpResponse(json.dumps(task_name))
