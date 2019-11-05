@@ -1,9 +1,10 @@
-var task_list = [];
+var task_list = [{"task_name":"test1","progress_rate":"1.0000"},{"task_name":"test2","progress_rate":0.8923}];
+console.log(task_list)
 $(function () {
-	getProgress();
+	//getProgress();
 	createList(task_list)
 	createBar(task_list)
-	setInterval(function () { moreTask() },2000)
+	//setInterval(function () { moreTask() },5000)
 })
 //请求到数据
 function getProgress() {
@@ -21,16 +22,19 @@ function getProgress() {
 				//error
 			} else {
 				task_list = JSON.parse(data)
+				if (task_list==[]) {
+					$('.col-10').append(`
+
+						`)
+				}
 			}
 		}
-
 	})
-	return task_list;
 }
 
 //动态创建列表
 function createList(data) {
-	$.each(data, function (index, item) {
+	$.each(task_list, function (index, item) {
 		$(".bar").append(`
 				<div class="row bar-list bar-list${index} pt-3">
 					<div class="col-9">
@@ -47,9 +51,9 @@ function createList(data) {
 }
 // 进度条列表
 function createBar(data) {
-	$.each(data, function (index, item) {
+	$.each(task_list, function (index, item) {
 	    var rate = item.progress_rate *100
-	    rate  = rate.toFixed(3);
+	    rate  = rate.toFixed(2);
 		$(".bar-list" + index).append(`
 		<br>
 		<div class="progress col-10 mt-2 ml-3 row" style="padding:0">
@@ -60,6 +64,7 @@ function createBar(data) {
 		`)
 	})
 }
+
 function moreTask(){
 	var obj = {
 		'task_name': 'task_name',
@@ -76,9 +81,12 @@ function moreTask(){
 			} else {
 				$.each(JSON.parse(data),function(index,item){
 				   var rate = item.progress_rate *100
-	                rate  = rate.toFixed(3);
+	                rate  = rate.toFixed(2);
 					$(".bar-list" + index + " .progress-bar").css("width",rate+"%");
 					$(".bar-list" + index + " .progress-bar span").text(rate+"%");
+					if ($('.bar-list'+index).find('.progress-bar').children('span').html()=="100.00%") {
+						$('.bar-list'+index).remove()
+					}
 				})
 			}
 		}
