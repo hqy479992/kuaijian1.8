@@ -8,10 +8,10 @@ from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
-'''
+
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
-'''
+
 
 from multiprocessing import Queue
 

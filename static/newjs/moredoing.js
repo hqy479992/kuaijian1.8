@@ -1,10 +1,10 @@
-var task_list = [{"task_name":"test1","progress_rate":"1.0000"},{"task_name":"test2","progress_rate":0.8923}];
+var task_list = [];
 console.log(task_list)
 $(function () {
-	//getProgress();
+	getProgress();
 	createList(task_list)
 	createBar(task_list)
-	//setInterval(function () { moreTask() },5000)
+	setInterval(function () { moreTask() },5000)
 })
 //请求到数据
 function getProgress() {
@@ -34,7 +34,7 @@ function getProgress() {
 
 //动态创建列表
 function createList(data) {
-	$.each(task_list, function (index, item) {
+	$.each(data, function (index, item) {
 		$(".bar").append(`
 				<div class="row bar-list bar-list${index} pt-3">
 					<div class="col-9">
@@ -51,7 +51,7 @@ function createList(data) {
 }
 // 进度条列表
 function createBar(data) {
-	$.each(task_list, function (index, item) {
+	$.each(data, function (index, item) {
 	    var rate = item.progress_rate *100
 	    rate  = rate.toFixed(2);
 		$(".bar-list" + index).append(`
