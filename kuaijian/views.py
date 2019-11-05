@@ -267,9 +267,9 @@ def exe_clip(task_name, process_bar, conf, video_ls, audio_path):
     from clip_utils import ClipControler
     import tensorflow as tf
 
-    config = tf.compat.v1.ConfigProto()
-    config.gpu_options.per_process_gpu_memory_fraction = 0.4
-    session = tf.Session(config=config)
+    tf_config = tf.compat.v1.ConfigProto()
+    tf_config.gpu_options.allow_growth = True
+    session = tf.Session(config=tf_config)
     try:
         # 开始合成
         syn_handler = SoundxHandler()
