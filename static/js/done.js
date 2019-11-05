@@ -1,4 +1,5 @@
 //全局变量
+'use strict'
 
 window.onload=function(){
 	var obj={
@@ -84,59 +85,53 @@ $('#deletefilemodal').on('show.bs.modal',function(event){
 function showdirs(data){
 	$('#showboard').html('')
 	data=JSON.parse(data)
+	var path
 	for (path in data) {
-		if(data[path]=='dir'){
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa fa-folder fa-5x'),
-									$('<br>'),
-									$('<p>').append(path)))
+		var diffrenticon=``
+		var basicbuttonbefore=`<button type="button" class="btn btn-outline-info ml-3 border-0" onclick="chosed(this)">
+							<span class="fa fa-square-o fa-lg mr-5 pr-5"></span>
+							<br>`
+		var basicbuttonafter=`<br>
+							<p>${path}</p>
+						</button>`
+		
+		if(data[path].toLowerCase()=='dir'){
+			diffrenticon=`<span class="fa fa-folder fa-5x"></span>`
+			$('#showboard').append(basicbuttonbefore+diffrenticon+basicbuttonafter)
 		}
-		else if(data[path]=='.mp3'){
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa-stack fa-2x my-2').append(
-										$('<i>').attr('class','fa fa-file-o fa-stack-2x'),
-										$('<i>').attr('class','fa fa-music fa-stack-1x')),
-									$('<br>'),
-									$('<p>').append(path)))
+		else if(data[path].toLowerCase()=='.mp3'){
+			diffrenticon=`<span class="fa-stack fa-2x my-2">
+								<i class="fa fa-file-o fa-stack-2x"></i>
+								<i class="fa fa-music fa-stack-1x"></i>
+							</span>`
+			$('#showboard').append(basicbuttonbefore+diffrenticon+basicbuttonafter)
 		}
-		else if(data[path]=='.mp4'){
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<img>').attr('src','static/resultfiles/'+path.slice(0,-4)+'mvtojpg.jpg').attr('class','showmvimg'),
-									$('<p>').append(path)))
+		else if(data[path].toLowerCase()=='.mp4'){
+			var videoname=path.slice(0,-4)
+			diffrenticon=`<img src="static/resultfiles/${videoname}mvtojpg.jpg" class="showmvimg">`
+			$('#showboard').append(basicbuttonbefore+diffrenticon+basicbuttonafter)
 		}
-		else if(data[path]=='.xml'){
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa fa-file-code-o fa-4x my-2'),
-									$('<br>'),
-									$('<p>').append(path)))
+		else if(data[path].toLowerCase()=='.xml'){
+			diffrenticon=`<span class="fa fa-file-code-o fa-4x my-2"></span>`
+			$('#showboard').append(basicbuttonbefore+diffrenticon+basicbuttonafter)
 		}
-		else if (data[path]=='.jpg') {
+		else if (data[path].toLowerCase()=='.jpg') {
 			if(path.substr(-11)=='mvtojpg.jpg'){
 				//do nothing
 			}
 			else{
-				$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-										$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-										$('<br>'),
-										$('<img>').attr('src','static/uploadfiles/'+path+'.jpg').attr('class','showmvimg'),
-										$('<p>').append(path)))
+				diffrenticon=`<img src="static/resultfiles/${path}" class="showmvimg">`
+				$('#showboard').append(basicbuttonbefore+diffrenticon+basicbuttonafter)
 			}
 		}
 		else{
-			$('#showboard').append($('<button>').attr('type','button').attr('class','btn btn-outline-info ml-3 border-0').attr('onclick','chosed(this)').append(
-									$('<span>').attr('class','fa fa-square-o fa-lg mr-5 pr-5'),
-									$('<br>'),
-									$('<span>').attr('class','fa fa-file-o fa-4x my-2'),
-									$('<br>'),
-									$('<p>').append(path)))
+			if (path=='kuaijianresultfilestest.txt') {
+				//do nothing
+			}
+			else{
+				diffrenticon=`<span class="fa fa-file-o fa-4x my-2"></span>`
+				$('#showboard').append(basicbuttonbefore+diffrenticon+basicbuttonafter)
+			}
 		}
 	}
 }

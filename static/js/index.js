@@ -62,3 +62,12 @@ var fileschosed=function(value,thisinput){
 		}
 	})
 }
+
+//监控鼠标的点击事件，如果点击可跳转的按钮的时候给出提示
+$('#header').click(function(){
+	
+})
+
+$('nav').click(function(){
+	
+})

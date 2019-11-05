@@ -1,5 +1,4 @@
 var task_list = [];
-console.log(task_list)
 $(function () {
 	getProgress();
 	createList(task_list)
@@ -18,14 +17,21 @@ function getProgress() {
 		data: JSON.stringify(obj),
 		async: false,
 		success: function (data) {
+			console.log(data)
 			if (data == 'error') {
 				//error
 			} else {
 				task_list = JSON.parse(data)
-				if (task_list==[]) {
+				if (task_list.length==0) {
 					$('.col-10').append(`
-
+							<h4 class="text-center text-black-50 mt-5 pt-5">
+								<span class="fa fa-hourglass-o mr-3"></span>
+								没有正在合成的任务...
+							</h4>
 						`)
+				}
+				else{
+					$('.col-10').html('')
 				}
 			}
 		}
@@ -107,7 +113,7 @@ function closeBar(e, name) {
 		async: true,
 		success: function (data) {
 			if (data == 'error') {
-				//    console.log("交互失败")
+				//console.log("交互失败")
 			}
 			else {
 				console.log(data)

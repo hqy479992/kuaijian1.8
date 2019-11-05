@@ -12,7 +12,6 @@ from django.views.decorators.http import require_http_methods
 from patch import ExtractAudioTrack
 from soundxHandler import SoundxHandler
 
-
 from multiprocessing import Queue
 
 # Create your views here.
