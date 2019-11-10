@@ -23,12 +23,19 @@ class Executor:
             p.start()
 
     def stop(self, task_name):
-        self._tasks[task_name].terminate()
-        self._clean_infos(task_name)
-        print("successful stopped task {}".format(task_name))
-        if len(self._buffer) > 0:
-            task_name, queue, func, args = self._buffer.pop(0)
-            self.submit(task_name, queue, func, *args)
+        if task_name in self._tasks:
+            self._tasks[task_name].terminate()
+            self._clean_infos(task_name)
+            print("successful stopped task {}".format(task_name))
+            if len(self._buffer) > 0:
+                task_name, queue, func, args = self._buffer.pop(0)
+                self.submit(task_name, queue, func, *args)
+        else:
+            del self._rate_cache[task_name]
+            for item in self._buffer:
+                if item[0] == task_name:
+                    self._buffer.remove(item)
+                    break
 
     def get_all_tasks(self):
         res = list(self._tasks.keys())
