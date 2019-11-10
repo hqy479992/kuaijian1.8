@@ -17,11 +17,11 @@ function getProgress() {
 		data: JSON.stringify(obj),
 		async: false,
 		success: function (data) {
-			console.log(data)
 			if (data == 'error') {
 				//error
 			} else {
 				task_list = JSON.parse(data)
+
 				if (task_list.length==0) {
 					$('.col-10').append(`
 							<h4 class="text-center text-black-50 mt-5 pt-5">
@@ -31,8 +31,10 @@ function getProgress() {
 						`)
 				}
 				else{
-					$('.col-10').html('')
+					$('.col-10').html('');
+					return task_list;
 				}
+
 			}
 		}
 	})
@@ -63,11 +65,12 @@ function createBar(data) {
 		$(".bar-list" + index).append(`
 		<br>
 		<div class="progress col-10 mt-2 ml-3 row" style="padding:0">
-		<div class="progress-bar progress-bar-striped progress-bar-animated bg-info"  role="progressbar" aria-valuemin="0" aria-valuemax="100"  style="width: ${rate}%;">
-		    <span>${rate}%</span>
+		<div class="progress-bar progress-bar-striped progress-bar-animated bg-info"  role="progressbar" aria-valuemin="0" aria-valuemax="100"  style="width:${rate == 0 ?0:rate}%">
+		    <span style="color:black">${rate == 0 ? '正在等待' : rate+"%"}</span>
 		</div>
 	</div>
 		`)
+
 	})
 }
 
@@ -88,11 +91,15 @@ function moreTask(){
 				$.each(JSON.parse(data),function(index,item){
 				   var rate = item.progress_rate *100
 	                rate  = rate.toFixed(2);
-					$(".bar-list" + index + " .progress-bar").css("width",rate+"%");
-					$(".bar-list" + index + " .progress-bar span").text(rate+"%");
-					if ($('.bar-list'+index).find('.progress-bar').children('span').html()=="100.00%") {
+					if ($('.bar-list'+index).find('.progress-bar').children('span').html()=="2.00%") {
+						window.location.reload()
 						$('.bar-list'+index).remove()
+
+					}else{
+                        $(".bar-list" + index + " .progress-bar").css("width",rate == 0 ? "0.00%":rate + "%");
+                        $(".bar-list" + index + " .progress-bar").html(`<span style="color:black">${rate == 0 ? '正在等待' : rate+"%"}</span>`);
 					}
+
 				})
 			}
 		}
@@ -102,7 +109,7 @@ function moreTask(){
 function closeBar(e, name) {
 	// name = name || "";
 	$(e.target).parent().parent().remove();
-	// task_list.splice(task_list.indexOf(name), 1);
+	 task_list.splice(task_list.indexOf(name), 1);
 	var obj = {
 		'task_name': name
 	}
@@ -113,11 +120,12 @@ function closeBar(e, name) {
 		async: true,
 		success: function (data) {
 			if (data == 'error') {
-				//console.log("交互失败")
+				console.log("交互失败")
 			}
 			else {
 				console.log(data)
+				window.location.reload();
 			}
 		}
 	})
-}
+}``

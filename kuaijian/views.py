@@ -341,8 +341,8 @@ def stop_task(request):
         js_obj = json.loads(request.body.decode())
         task_name = js_obj['task_name']
         executor.stop(task_name)
-        return HttpResponse(json.loads({'result': 'stopped'}))
-    except:
+        return HttpResponse(json.dumps({'result': 'stopped'}))
+    except Exception:
         return HttpResponse('error')
 
 
